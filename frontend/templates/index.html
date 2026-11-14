@@ -1,0 +1,299 @@
+<!doctype html>
+<html lang="pt-BR">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <title>Busca de voos · PRJ.10</title>
+        <link
+            rel="stylesheet"
+            href="{{ url_for('static', filename='style.css') }}"
+        />
+    </head>
+    <body>
+        <main>
+            <header>
+                <a href="{{ url_for('index') }}" class="marca"
+                    >VOA<span> / </span>LAB</a
+                ><span class="selo">PRJ.10 · Teoria dos conjuntos</span>
+                <nav class="navegacao-paginas" aria-label="Páginas do projeto">
+                    <a href="{{ url_for('index') }}" aria-current="page">Busca de voos</a>
+                    <a href="{{ url_for('apresentacao') }}">Códigos do projeto</a>
+                </nav>
+            </header>
+            <section class="intro">
+                <p class="sobretitulo">EXPLORE A BASE</p>
+                <h1>Uma busca.<br />Muitas possibilidades.</h1>
+                <p class="descricao">
+                    Combine companhias, cidades e turnos com <strong>e</strong>,
+                    <strong>ou</strong> e <strong>exceto</strong>.
+                </p>
+                {% if importada %}
+                <form action="{{ url_for('index') }}" method="get">
+                    <label for="q">O que você procura?</label>
+                    <div class="busca">
+                        <input
+                            id="q"
+                            name="q"
+                            type="search"
+                            maxlength="300"
+                            value="{{ consulta }}"
+                            placeholder="Digite uma companhia, cidade ou turno"
+                            required
+                        /><button type="submit">
+                            Buscar <span aria-hidden="true">↗</span>
+                        </button>
+                    </div>
+                </form>
+                <nav class="exemplos" aria-label="Exemplos de busca">
+                    {% for exemplo in exemplos %}
+                    <a href="{{ url_for('index', q=exemplo) }}"
+                        >{{ exemplo }}</a
+                    >
+                    {% endfor %}
+                </nav>
+                <p class="ajuda">
+                    Acentos e maiúsculas são opcionais. Use companhias, cidades
+                    e turnos da base abaixo.
+                </p>
+                <a class="atalho-importacao" href="#dados-csv">Ver dados dos CSVs ↓</a>
+                {% else %}
+                <p class="vazio" role="status">
+                    Nenhum CSV importado. Envie os arquivos de companhias e
+                    cidades abaixo para começar a buscar.
+                </p>
+                {% endif %}
+                <a class="atalho-importacao" href="#importar-csv"
+                    >Usar meus próprios CSVs ↓</a
+                >
+            </section>
+            {% if pesquisou %}
+            <section class="painel" aria-labelledby="titulo-resultados">
+                <div class="titulo-painel">
+                    <h2 id="titulo-resultados">Resultado da busca</h2>
+                    {% if not erro %}<span
+                        >{{ quantidade }} combinação(ões)</span
+                    >{% endif %}
+                </div>
+                {% if erro %}
+                <p class="erro" role="alert">{{ erro }}</p>
+                {% elif resultados %}
+                <div class="tabela">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th scope="col">Companhia</th>
+                                <th scope="col">Cidade</th>
+                                <th scope="col">Turnos</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for linha in resultados %}
+                            <tr>
+                                <td><strong>{{ linha.companhia }}</strong></td>
+                                <td>{{ linha.cidade }}</td>
+                                <td>
+                                    {% for turno in linha.turnos %}<span
+                                        class="turno"
+                                        >{{ turno }}</span
+                                    >{% endfor %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <p class="vazio">
+                    Nenhuma combinação encontrada. Experimente outro termo ou o
+                    operador “ou”.
+                </p>
+                {% endif %} {% if etapas %}
+                <details>
+                    <summary>Como a consulta foi resolvida</summary>
+                    <ol>
+                        {% for etapa in etapas %}
+                        <li>{{ etapa }}</li>
+                        {% endfor %}
+                    </ol>
+                </details>
+                {% endif %}
+            </section>
+            {% endif %}
+            <section
+                id="importar-csv"
+                class="painel importacao"
+                aria-labelledby="titulo-importacao"
+            >
+                <div class="titulo-painel">
+                    <h2 id="titulo-importacao">Importar seus CSVs</h2>
+                    <span
+                        >{{ 'Seus arquivos estão em uso' if importada else 'Aguardando seus arquivos' }}</span
+                    >
+                </div>
+                <p>
+                    Selecione o arquivo de companhias e o de cidades. Ao
+                    importar, os dois passam a formar a base usada nas buscas. Um novo envio substitui a base anterior. Os
+                    dados ficam salvos para os próximos acessos.
+                </p>
+                {% if sucesso %}
+                <p class="sucesso" role="status">{{ sucesso }}</p>
+                {% endif %} {% if erro_importacao %}
+                <p class="erro" role="alert">
+                    {{ erro_importacao }}
+                    {% if importada %}A base anterior foi mantida.{% endif %}
+                </p>
+                {% endif %}
+                <form
+                    action="{{ url_for('importar') }}"
+                    method="post"
+                    enctype="multipart/form-data"
+                >
+                    <input type="hidden" name="csrf" value="{{ csrf }}" />
+                    <div class="arquivos-csv">
+                        <div class="arquivo-csv">
+                            <label for="companhias">1. Companhias aéreas</label>
+                            <p>Cabeçalho: <code>companhia,cidade</code></p>
+                            <input
+                                id="companhias"
+                                name="companhias"
+                                type="file"
+                                accept=".csv,text/csv"
+                                required
+                            /><a
+                                href="{{ url_for('modelo', tipo='companhias') }}"
+                                >Baixar modelo vazio</a
+                            >
+                        </div>
+                        <div class="arquivo-csv">
+                            <label for="cidades">2. Cidades e turnos</label>
+                            <p>Cabeçalho: <code>cidade,turno</code></p>
+                            <input
+                                id="cidades"
+                                name="cidades"
+                                type="file"
+                                accept=".csv,text/csv"
+                                required
+                            /><a href="{{ url_for('modelo', tipo='cidades') }}"
+                                >Baixar modelo vazio</a
+                            >
+                        </div>
+                    </div>
+                    <p class="ajuda">
+                        Até 2 MB no envio. Aceita vírgula ou ponto e vírgula e
+                        codificação UTF-8. Use a mesma cidade nos dois arquivos
+                        e os turnos manhã, tarde ou noite.
+                    </p>
+                    <button class="botao-importar" type="submit">
+                        Importar e usar nas buscas
+                    </button>
+                </form>
+            </section>
+            {% if importada %}
+            <section id="dados-csv" class="painel base" aria-labelledby="titulo-csvs">
+                <div class="titulo-painel">
+                    <h2 id="titulo-csvs">Dados dos CSVs importados</h2>
+                    <span>Conteúdo de cada arquivo</span>
+                </div>
+                <p>Consulte as linhas dos dois arquivos enviados. A escrita e a ordem dos dados foram preservadas.</p>
+                <div class="dados-csv">
+                    <article>
+                        <div class="titulo-painel">
+                            <h3>Companhias aéreas</h3>
+                            <span>{{ companhias_csv|length }} linha(s)</span>
+                        </div>
+                        <div class="tabela tabela-csv">
+                            <table id="csv-companhias">
+                                <caption>CSV de companhias</caption>
+                                <thead><tr><th scope="col">Companhia</th><th scope="col">Cidade</th></tr></thead>
+                                <tbody>
+                                    {% for linha in companhias_csv %}
+                                    <tr><td>{{ linha.companhia }}</td><td>{{ linha.cidade }}</td></tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </article>
+                    <article>
+                        <div class="titulo-painel">
+                            <h3>Cidades e turnos</h3>
+                            <span>{{ cidades_csv|length }} linha(s)</span>
+                        </div>
+                        <div class="tabela tabela-csv">
+                            <table id="csv-cidades">
+                                <caption>CSV de cidades</caption>
+                                <thead><tr><th scope="col">Cidade</th><th scope="col">Turno</th></tr></thead>
+                                <tbody>
+                                    {% for linha in cidades_csv %}
+                                    <tr><td>{{ linha.cidade }}</td><td>{{ linha.turno }}</td></tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </article>
+                </div>
+            </section>
+            {% endif %}
+            <section class="operadores" aria-label="Operações de conjuntos">
+                <article>
+                    <span class="simbolo">∩</span>
+                    <h2>e <small>Interseção</small></h2>
+                    <p>Combinações que atendem aos dois filtros.</p>
+                    <code>companhia e turno</code>
+                </article>
+                <article>
+                    <span class="simbolo">∪</span>
+                    <h2>ou <small>União</small></h2>
+                    <p>Combinações de qualquer filtro, sem repetir.</p>
+                    <code>companhia ou turno</code>
+                </article>
+                <article>
+                    <span class="simbolo">−</span>
+                    <h2>exceto <small>Diferença</small></h2>
+                    <p>Retira do primeiro conjunto os itens do segundo.</p>
+                    <code>companhia exceto turno</code>
+                </article>
+            </section>
+            <p class="ajuda regra">
+                “e” tem prioridade. “ou” e “exceto” são resolvidos da esquerda
+                para a direita. Use parênteses para mudar a ordem.
+            </p>
+            {% if importada %}
+            <section class="painel base">
+                <div class="titulo-painel">
+                    <h2>Combinações usadas nas buscas</h2>
+                    <span>CSV → Pandas → resultado</span>
+                </div>
+                <p>
+                    Dados dos CSVs que você importou. Cada combinação representa
+                    companhia, cidade e turno; não há consulta a disponibilidade
+                    de voos reais.
+                </p>
+                <div class="tabela">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th scope="col">Companhia</th>
+                                <th scope="col">Cidade</th>
+                                <th scope="col">Turnos</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for linha in base %}
+                            <tr>
+                                <td>{{ linha.companhia }}</td>
+                                <td>{{ linha.cidade }}</td>
+                                <td>{{ linha.turnos | join(', ') }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+            {% endif %}
+            <footer>
+                Python + Flask + Pandas
+                <span>Dados armazenados em dois arquivos CSV.</span>
+            </footer>
+        </main>
+    </body>
+</html>

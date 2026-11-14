@@ -1,0 +1,131 @@
+{% macro etapa(id, numero) %}
+<section id="painel-{{ id }}" class="conteudo-aula" role="tabpanel" aria-labelledby="aba-{{ id }}" {% if numero != 1 %}hidden{% endif %}>
+    <article class="explicacao-aula">
+        <p class="sobretitulo">ETAPA {{ numero }} DE 8</p>
+        {{ caller() }}
+        <div class="demo-aula">
+            <strong>Veja na aplicação</strong>
+            {% if exemplos.get(id) %}
+            <p>O exemplo usa os CSVs que você já importou.</p>
+            <a href="{{ exemplos[id] }}" target="_blank" rel="noopener">Testar com meus CSVs ↗</a>
+            {% else %}
+            <p>Importe seus dois CSVs para demonstrar esta etapa com dados reais.</p>
+            <a href="{{ url_for('index') }}#importar-csv" target="_blank" rel="noopener">Abrir importação ↗</a>
+            {% endif %}
+        </div>
+    </article>
+    <figure class="janela-codigo">
+        <div class="barra-codigo"><span>{{ codigos[id].arquivo }}</span><span>{{ codigos[id].funcao }}()</span></div>
+        <p class="escopo-codigo">Função completa · {{ codigos[id].linhas|length }} linhas · numeração do arquivo original</p>
+        <pre tabindex="0" aria-label="Código completo de {{ codigos[id].funcao }}"><code>{% for linha in codigos[id].linhas %}<span class="linha-codigo{% if linha.destaque %} destaque{% endif %}"><span class="numero-linha" aria-hidden="true">{{ linha.numero }}</span>{{ linha.texto or ' ' }}</span>{% endfor %}</code></pre>
+        <figcaption>As linhas destacadas estão relacionadas ao conceito desta etapa.</figcaption>
+    </figure>
+</section>
+{% endmacro %}
+<!doctype html>
+<html lang="pt-BR">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Entenda a lógica · Busca de voos</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='apresentacao.css') }}" />
+    <script defer src="{{ url_for('static', filename='apresentacao.js') }}"></script>
+</head>
+<body>
+<main>
+    <header>
+        <a href="{{ url_for('index') }}" class="marca">VOA<span> / </span>LAB</a>
+        <span class="selo">Matemática para Computação</span>
+        <nav class="navegacao-paginas" aria-label="Páginas do projeto">
+            <a href="{{ url_for('index') }}">Busca de voos</a>
+            <a href="{{ url_for('apresentacao') }}" aria-current="page">Códigos do projeto</a>
+        </nav>
+    </header>
+    <section class="intro introducao-aula">
+        <p class="sobretitulo">DO CSV AOS CONJUNTOS</p>
+        <h1>Entenda a lógica.<br />Uma etapa de cada vez.</h1>
+        <p class="descricao">Escolha um conceito para acompanhar a explicação e a função completa que o implementa.</p>
+    </section>
+
+    <section class="aula" aria-label="Guia do código de busca de voos">
+        <div class="abas" role="tablist" aria-label="Etapas da explicação">
+            {% for id, nome in [('csv', 'CSV'), ('juncao', 'Junção'), ('filtros', 'Subconjuntos'), ('intersecao', 'Interseção'), ('uniao', 'União'), ('diferenca', 'Diferença'), ('prioridade', 'Operadores'), ('cardinalidade', 'Cardinalidade')] %}
+            <button id="aba-{{ id }}" type="button" role="tab" data-etapa="{{ id }}" aria-controls="painel-{{ id }}" aria-selected="{{ 'true' if loop.first else 'false' }}" tabindex="{{ 0 if loop.first else -1 }}">{{ '%02d'|format(loop.index) }} · {{ nome }}</button>
+            {% endfor %}
+        </div>
+
+        {% call etapa('csv', 1) %}
+        <p class="conceito-aula">Conceito: representação dos dados</p>
+        <h2>Os dados começam nos CSVs.</h2>
+        <p>A função <code>ler_csv</code> recebe um arquivo, confere seu formato e transforma as linhas em uma tabela do Pandas.</p>
+        <p class="detalhe-aula">A linha <code>pd.read_csv</code> faz a leitura. Depois, os valores são normalizados para a busca e <code>drop_duplicates()</code> remove repetições. A exibição dos arquivos usa os valores originais.</p>
+        <dl class="termos-aula"><div><dt>DataFrame</dt><dd>Tabela de linhas e colunas utilizada pelo Pandas.</dd></div><div><dt>Elemento repetido</dt><dd>Não é contado novamente quando formamos um conjunto.</dd></div></dl>
+        {% endcall %}
+
+        {% call etapa('juncao', 2) %}
+        <p class="conceito-aula">Conceito: relação entre tabelas</p>
+        <h2>Uma cidade liga as duas tabelas.</h2>
+        <p>Um CSV informa companhia e cidade. O outro informa cidade e turno. A função <code>ler_base</code> associa as informações pela cidade.</p>
+        <p class="detalhe-aula">O <code>merge(..., on="cidade")</code> forma triplas <strong>(companhia, cidade, turno)</strong>. Se uma cidade tem dois turnos, cada companhia dessa cidade gera duas combinações.</p>
+        <dl class="termos-aula"><div><dt>Junção</dt><dd>Relaciona linhas que têm a mesma cidade; não combina todas indiscriminadamente.</dd></div><div><dt>Tripla ordenada</dt><dd>Um elemento identificado pelas três colunas juntas.</dd></div></dl>
+        {% endcall %}
+
+        {% call etapa('filtros', 3) %}
+        <p class="conceito-aula">Conceito: subconjuntos</p>
+        <h2>Cada filtro forma um conjunto.</h2>
+        <p>A função <code>filtrar</code> seleciona as linhas que atendem a uma condição. Uma companhia pode formar A; um turno pode formar B.</p>
+        <p class="detalhe-aula"><code>base[coluna] == valor</code> verifica a condição. <code>base.loc[...]</code> devolve somente as linhas selecionadas. A função <code>buscar</code> usa esse filtro para formar os conjuntos.</p>
+        <dl class="termos-aula"><div><dt>Subconjunto</dt><dd>Conjunto formado por elementos retirados da base.</dd></div><div><dt>Condição do filtro</dt><dd>Regra como companhia igual ao nome informado.</dd></div></dl>
+        {% endcall %}
+
+        {% call etapa('intersecao', 4) %}
+        <p class="conceito-aula">Conceito: interseção · A ∩ B</p>
+        <h2>Precisa pertencer aos dois.</h2>
+        <p>A palavra <strong>e</strong> aplica a interseção. A resposta mantém apenas os elementos que aparecem em A e também em B.</p>
+        <p class="detalhe-aula">O <code>merge</code> interno compara companhia, cidade e turno. Assim, uma busca por companhia <strong>e</strong> noite mantém somente as combinações noturnas daquela companhia.</p>
+        <dl class="termos-aula"><div><dt>A ∩ B</dt><dd>Elementos comuns aos dois conjuntos.</dd></div><div><dt>COLUNAS</dt><dd>As três informações usadas para comparar um elemento inteiro.</dd></div></dl>
+        {% endcall %}
+
+        {% call etapa('uniao', 5) %}
+        <p class="conceito-aula">Conceito: união · A ∪ B</p>
+        <h2>Reunir sem contar duas vezes.</h2>
+        <p>A palavra <strong>ou</strong> aplica a união. A resposta recebe os elementos de A ou de B, incluindo os que pertencem aos dois.</p>
+        <p class="detalhe-aula"><code>pd.concat([a, b])</code> reúne as tabelas. Em seguida, <code>drop_duplicates()</code> garante que cada combinação apareça uma única vez.</p>
+        <dl class="termos-aula"><div><dt>A ∪ B</dt><dd>Todos os elementos de qualquer um dos conjuntos.</dd></div><div><dt>Remoção de repetições</dt><dd>Um elemento em comum continua sendo apenas um elemento.</dd></div></dl>
+        {% endcall %}
+
+        {% call etapa('diferenca', 6) %}
+        <p class="conceito-aula">Conceito: diferença · A − B</p>
+        <h2>Está em A, mas não está em B.</h2>
+        <p>A palavra <strong>exceto</strong> aplica a diferença. Retiramos do primeiro conjunto os elementos que também aparecem no segundo.</p>
+        <p class="detalhe-aula"><code>indicator=True</code> cria a coluna <code>_merge</code>. O valor <code>left_only</code> identifica as combinações encontradas somente no conjunto da esquerda, A.</p>
+        <dl class="termos-aula"><div><dt>A − B</dt><dd>Elementos de A que não pertencem a B.</dd></div><div><dt>A ordem importa</dt><dd>A − B pode produzir um resultado diferente de B − A.</dd></div></dl>
+        {% endcall %}
+
+        {% call etapa('prioridade', 7) %}
+        <p class="conceito-aula">Conceito: operadores de conjuntos</p>
+        <h2>Cada palavra escolhe uma operação.</h2>
+        <p>A função <code>aplicar_operacao</code> usa condições simples: “e” chama a interseção, “ou” chama a união e “exceto” chama a diferença.</p>
+        <p class="detalhe-aula">A busca resolve os parênteses primeiro, depois a interseção e, por último, união e diferença. Para excluir manhã e noite, use <code>companhia exceto (manha ou noite)</code>.</p>
+        <dl class="termos-aula"><div><dt>Prioridade</dt><dd>A interseção é calculada antes da união e da diferença.</dd></div><div><dt>Mesma prioridade</dt><dd>“Ou” e “exceto” são resolvidos da esquerda para a direita.</dd></div></dl>
+        {% endcall %}
+
+        {% call etapa('cardinalidade', 8) %}
+        <p class="conceito-aula">Conceito: cardinalidade · |A|</p>
+        <h2>Quantos elementos sobraram?</h2>
+        <p>A função <code>cardinalidade</code> usa <code>len(conjunto)</code> para contar os elementos. O site chama essa função depois da busca e mostra a quantidade encontrada.</p>
+        <p class="detalhe-aula"><strong>|A ∪ B| = |A| + |B| − |A ∩ B|</strong>. Subtraímos a interseção para não contar os elementos comuns duas vezes.</p>
+        <dl class="termos-aula"><div><dt>Cardinalidade</dt><dd>Quantidade de elementos de um conjunto.</dd></div><div><dt>Linhas visuais</dt><dd>Os turnos são agrupados na página; uma linha pode representar várias combinações.</dd></div></dl>
+        {% endcall %}
+
+        <div class="navegacao-aula">
+            <button id="anterior-aula" type="button" disabled>← Etapa anterior</button>
+            <span id="numero-aula" aria-live="polite">01 / 08</span>
+            <button id="proxima-aula" type="button">Próxima etapa →</button>
+        </div>
+    </section>
+    <footer>Python + Flask + Pandas <span>Conjuntos, relações e cardinalidade.</span></footer>
+</main>
+</body>
+</html>

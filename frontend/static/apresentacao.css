@@ -1,0 +1,40 @@
+.introducao-aula { padding-bottom: 25px; }
+.introducao-aula h1 { font-size: clamp(32px, 4.5vw, 48px); }
+.abas { display: flex; gap: 6px; padding: 7px; border: 1px solid var(--line); border-radius: 12px; overflow-x: auto; background: white; }
+.abas button { flex-shrink: 0; border: 0; border-radius: 7px; padding: 11px 13px; background: transparent; color: var(--muted); font: inherit; font-size: 12px; font-weight: 600; cursor: pointer; }
+.abas button[aria-selected="true"] { background: var(--ink); color: white; }
+.conteudo-aula { display: grid; grid-template-columns: minmax(0, .85fr) minmax(0, 1.15fr); gap: 28px; padding: 26px 0; align-items: start; }
+.conteudo-aula[hidden] { display: none; }
+.explicacao-aula { min-width: 0; }
+.explicacao-aula > .sobretitulo { margin: 0 0 14px; }
+.explicacao-aula .conceito-aula { font-size: 12px; color: #657d32; font-weight: 650; }
+.explicacao-aula h2 { font-size: 25px; line-height: 1.2; letter-spacing: -.6px; margin: 10px 0 16px; }
+.explicacao-aula > p { font-size: 14px; color: var(--muted); }
+.explicacao-aula .detalhe-aula { padding: 15px; border-left: 3px solid #a5c65a; border-radius: 0 8px 8px 0; background: #edf3e4; color: var(--ink); font-size: 13px; }
+.detalhe-aula code { overflow-wrap: anywhere; }
+.termos-aula { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin: 18px 0; }
+.termos-aula > div { padding: 13px; border: 1px solid var(--line); border-radius: 9px; background: white; }
+.termos-aula dt { font-size: 12px; font-weight: 750; }
+.termos-aula dd { margin: 6px 0 0; color: var(--muted); font-size: 12px; }
+.demo-aula { padding: 16px; border: 1px solid var(--line); border-radius: 10px; background: white; }
+.demo-aula strong { font-size: 13px; }
+.demo-aula p { font-size: 12px; color: var(--muted); margin: 6px 0 12px; }
+.demo-aula a { display: inline-block; border: 1px solid var(--line); border-radius: 7px; padding: 8px 11px; color: var(--ink); text-decoration: none; font-size: 12px; font-weight: 650; }
+.demo-aula a:hover { background: var(--accent); }
+.janela-codigo { min-width: 0; margin: 0; overflow: hidden; border: 1px solid #35574c; border-radius: 12px; background: #14332f; color: #ecf4df; }
+.barra-codigo { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 7px; padding: 13px 15px; border-bottom: 1px solid #ffffff21; color: #c6d8b9; font: 11px/1.5 Consolas, monospace; }
+.escopo-codigo { margin: 0; padding: 10px 15px; font-size: 10px; color: #b8cbb1; }
+.janela-codigo pre { min-height: 150px; max-height: 520px; overflow: auto; margin: 0; padding: 8px 0 18px; scrollbar-color: #75936a #14332f; }
+.janela-codigo code { color: inherit; font: 12px/1.9 Consolas, "Cascadia Code", monospace; }
+.linha-codigo { display: block; min-height: 23px; min-width: max-content; padding-right: 18px; }
+.linha-codigo.destaque { background: #d9f47619; color: #e2f7a5; box-shadow: inset 3px 0 #bddf68; }
+.numero-linha { display: inline-block; width: 46px; padding-right: 13px; color: #91ad9e; text-align: right; user-select: none; }
+.janela-codigo figcaption { padding: 12px 15px; border-top: 1px solid #ffffff21; color: #b8cbb1; font-size: 11px; }
+.janela-codigo pre:focus-visible { outline: 3px solid #b7d95f; outline-offset: -3px; }
+.navegacao-aula { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 18px 0 30px; border-top: 1px solid var(--line); }
+.navegacao-aula button { border: 1px solid #b8ccc0; border-radius: 8px; background: white; padding: 10px 14px; color: var(--ink); font: inherit; font-size: 12px; font-weight: 650; cursor: pointer; }
+.navegacao-aula button:disabled { opacity: .4; cursor: default; }
+.navegacao-aula button:last-child { background: var(--ink); border-color: var(--ink); color: white; }
+#numero-aula { color: var(--muted); font-size: 12px; white-space: nowrap; }
+@media (max-width: 780px) { .conteudo-aula { grid-template-columns: 1fr; gap: 20px; } .janela-codigo pre { max-height: 460px; } }
+@media (max-width: 450px) { .termos-aula { grid-template-columns: 1fr; } .navegacao-aula { gap: 7px; flex-wrap: wrap; } .navegacao-aula button { padding: 10px; font-size: 11px; } }

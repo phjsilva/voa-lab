@@ -1,0 +1,6 @@
+.venv/
+__pycache__/
+*.pyc
+data/.importacoes/
+data/.base_ativa*
+data/.validacao-*/
