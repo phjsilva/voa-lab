@@ -16,7 +16,9 @@ if (formulario) {
     };
 
     function atualizarConsulta() {
-        const operador = formulario.querySelector('input[name="operador"]:checked').value;
+        const operador = formulario.querySelector(
+            'input[name="operador"]:checked',
+        ).value;
         campoSegundo.hidden = !operador;
         segundo.disabled = !operador;
         consulta.value = "voos " + primeiro.value;
