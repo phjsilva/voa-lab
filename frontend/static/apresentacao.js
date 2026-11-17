@@ -6,6 +6,72 @@ const proxima = document.getElementById("proxima-aula");
 const numero = document.getElementById("numero-aula");
 let etapaAtual = 0;
 
+// Colore o código já recebido do Python, sem interpretar ou executar seu conteúdo.
+const palavrasPython = new Set([
+    "def", "return", "if", "else", "elif", "for", "in", "not", "and", "or",
+    "try", "except", "raise", "from", "import", "as", "with", "while", "break",
+]);
+
+document.querySelectorAll(".texto-codigo").forEach(elemento => {
+    const texto = elemento.textContent;
+    const partes = /#[^\n]*|""".*?"""|'''.*?'''|"(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*'|\b\d+\b|\b[a-zA-Z_]\w*\b/g;
+    const fragmento = document.createDocumentFragment();
+    let fim = 0;
+    for (const parte of texto.matchAll(partes)) {
+        const palavra = parte[0];
+        const inicio = parte.index;
+        fragmento.append(document.createTextNode(texto.slice(fim, inicio)));
+        let classe = "";
+        if (palavra.startsWith("#")) classe = "comentario";
+        else if (palavra.startsWith('"') || palavra.startsWith("'")) classe = "texto";
+        else if (palavrasPython.has(palavra)) classe = "palavra";
+        else if (["True", "False", "None"].includes(palavra)) classe = "constante";
+        else if (/^\d/.test(palavra)) classe = "numero";
+        else if (texto.slice(inicio + palavra.length).trimStart().startsWith("(")) classe = "funcao";
+
+        const trecho = document.createElement("span");
+        trecho.textContent = palavra;
+        if (classe) trecho.className = `sintaxe-${classe}`;
+        fragmento.append(trecho);
+        fim = inicio + palavra.length;
+    }
+    fragmento.append(document.createTextNode(texto.slice(fim)));
+    elemento.replaceChildren(fragmento);
+});
+
+function focarCodigo(ativo) {
+    document.body.classList.toggle("codigo-em-foco", ativo);
+    document.querySelectorAll(".focar-codigo").forEach(botao => {
+        botao.setAttribute("aria-pressed", String(ativo));
+        botao.textContent = ativo ? "Voltar à explicação ↙" : "Ampliar código ↗";
+    });
+}
+
+document.querySelectorAll(".focar-codigo").forEach(botao => {
+    botao.addEventListener("click", () => {
+        focarCodigo(!document.body.classList.contains("codigo-em-foco"));
+    });
+});
+
+document.querySelectorAll(".copiar-codigo").forEach(botao => {
+    botao.addEventListener("click", async () => {
+        const bloco = botao.closest(".bloco-codigo");
+        const aviso = bloco.querySelector(".aviso-codigo");
+        const linhas = Array.from(bloco.querySelectorAll(".texto-codigo"));
+        const texto = linhas.map(linha => linha.textContent).join("\n");
+        try {
+            await navigator.clipboard.writeText(texto);
+            aviso.textContent = "Código copiado, sem a numeração das linhas.";
+        } catch {
+            aviso.textContent = "Não foi possível copiar. Selecione o código e use Ctrl+C.";
+        }
+    });
+});
+
+document.addEventListener("keydown", evento => {
+    if (evento.key === "Escape") focarCodigo(false);
+});
+
 function mostrarEtapa(indice, atualizarEndereco = true) {
     etapaAtual = indice;
     abas.forEach((aba, posicao) => {

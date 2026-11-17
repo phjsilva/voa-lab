@@ -1,189 +1,112 @@
-"""Parte matemática: filtros, interseção, união e diferença com Pandas."""
+"""Filtros e operações de conjuntos com Pandas."""
 
-import re
 import unicodedata
 import pandas as pd
 
 COLUNAS = ["companhia", "cidade", "turno"]
+OPERADORES = ["e", "ou", "exceto"]
 
 
-def intersecao(a, b):
-    """A ∩ B: combinações presentes nos dois conjuntos."""
-    return a.merge(b, on=COLUNAS, how="inner").drop_duplicates()
-
-
-def uniao(a, b):
-    """A ∪ B: combinações de A ou B, sem repetir."""
-    return pd.concat([a, b], ignore_index=True).drop_duplicates()
-
-
-def diferenca(a, b):
-    """A − B: combinações de A que não estão em B."""
-    comparacao = a.merge(b, on=COLUNAS, how="left", indicator=True)
-    return comparacao.loc[comparacao["_merge"] == "left_only", COLUNAS].drop_duplicates()
+def normalizar(texto):
+    texto = unicodedata.normalize("NFKD", str(texto).lower())
+    resultado = ""
+    for letra in texto:
+        if not unicodedata.combining(letra):
+            resultado += letra
+    return " ".join(resultado.split())
 
 
 def filtrar(base, coluna, valor):
-    """Seleciona o subconjunto que atende a uma condição."""
-    return base.loc[base[coluna] == valor]
+    return base[base[coluna] == valor]
 
 
-def cardinalidade(conjunto):
-    """|A|: quantidade de elementos do conjunto."""
-    return len(conjunto)
+def intersecao(a, b):
+    resultado = a.merge(b, on=COLUNAS)
+    return resultado.drop_duplicates()
 
 
-OPERADORES = ("e", "ou", "exceto")
+def uniao(a, b):
+    resultado = pd.concat([a, b])
+    return resultado.drop_duplicates()
+
+
+def diferenca(a, b):
+    comparacao = a.merge(b, on=COLUNAS, how="left", indicator=True)
+    resultado = comparacao[comparacao["_merge"] == "left_only"]
+    return resultado[COLUNAS].drop_duplicates()
 
 
 def aplicar_operacao(a, b, operador):
-    """Escolhe a operação correspondente à palavra digitada."""
     if operador == "e":
         return intersecao(a, b)
     if operador == "ou":
         return uniao(a, b)
     if operador == "exceto":
         return diferenca(a, b)
-    raise ValueError("Operador desconhecido.")
+    raise ValueError("Use e, ou ou exceto.")
 
 
-def normalizar(texto):
-    texto = unicodedata.normalize("NFKD", str(texto).lower())
-    texto = "".join(letra for letra in texto if not unicodedata.combining(letra))
-    return " ".join(texto.split())
+def cardinalidade(conjunto):
+    return len(conjunto)
 
 
 def criar_termos(base):
-    """Relaciona cada palavra de busca à coluna e ao valor do CSV."""
     termos = {}
     for coluna in COLUNAS:
         for valor in base[coluna].unique():
-            if valor in {"e", "ou", "exceto", "voo", "voos"} or re.search(r"[^\w\s-]", valor):
-                raise ValueError(f"Valor não suportado no CSV: {valor!r}.")
-            if valor in termos and termos[valor] != (coluna, valor):
-                raise ValueError(f"Termo ambíguo entre colunas: {valor!r}.")
+            if valor in OPERADORES + ["voo", "voos"] or "(" in valor or ")" in valor:
+                raise ValueError(f"Nome reservado no CSV: {valor}.")
+            if valor in termos and termos[valor][0] != coluna:
+                raise ValueError(f"Nome repetido em colunas diferentes: {valor}.")
             termos[valor] = (coluna, valor)
     apelidos = {
-        "sao jose dos campos": ("cidade", "sjc"), "belem": ("cidade", "bel"),
-        "matutino": ("turno", "manha"), "matutinos": ("turno", "manha"),
-        "vespertino": ("turno", "tarde"), "vespertinos": ("turno", "tarde"),
-        "noturno": ("turno", "noite"), "noturnos": ("turno", "noite"),
+        "sao jose dos campos": "sjc", "belem": "bel",
+        "matutino": "manha", "matutinos": "manha",
+        "vespertino": "tarde", "vespertinos": "tarde",
+        "noturno": "noite", "noturnos": "noite",
     }
-    for apelido, (coluna, valor) in apelidos.items():
-        if valor in base[coluna].values and apelido not in termos:
-            termos[apelido] = (coluna, valor)
+    for apelido, valor in apelidos.items():
+        if valor in termos and apelido not in termos:
+            termos[apelido] = termos[valor]
     return termos
 
 
 def separar_termos(texto, termos):
-    """Transforma 'voos latam e noite' em ['latam', 'e', 'noite']."""
-    texto = re.sub(r"^voos?\b\s*", "", normalizar(texto))
-    if not texto:
-        raise ValueError("Digite uma companhia, cidade ou turno.")
-    if len(texto) > 300:
-        raise ValueError("Use uma busca com até 300 caracteres.")
-    nomes = sorted(termos, key=len, reverse=True)
+    palavras = normalizar(texto).split()
+    if palavras and palavras[0] in ["voo", "voos"]:
+        palavras.pop(0)
     tokens = []
-    while texto:
-        token = None
-        operador = re.match(r"(?:exceto|ou|e)\b|[()]", texto)
-        if operador:
-            token = operador.group()
-        else:
-            for nome in nomes:
-                if texto.startswith(nome) and (len(texto) == len(nome) or texto[len(nome)] in " ()"):
-                    token = nome
-                    break
-        if token is None:
-            raise ValueError(f"Termo não reconhecido: {texto.split()[0]!r}. Consulte a base abaixo.")
-        # Dois termos juntos indicam interseção: 'latam sjc' = 'latam e sjc'.
-        if tokens:
-            anterior = tokens[-1]
-            anterior_e_conjunto = anterior in termos or anterior == ")"
-            atual_e_conjunto = token in termos or token == "("
-            if anterior_e_conjunto and atual_e_conjunto:
-                tokens.append("e")
-        tokens.append(token)
-        texto = texto[len(token):].lstrip()
-    return tokens
-
-
-def resolver(tokens, filtros, etapas):
-    """Primeiro calcula interseções; depois, uniões e diferenças."""
-    if not tokens or len(tokens) % 2 == 0:
-        raise ValueError("A busca precisa alternar termos e operadores.")
-
-    for posicao in range(0, len(tokens), 2):
-        if tokens[posicao] not in filtros:
-            raise ValueError("Confira os termos e parênteses da busca.")
-    for posicao in range(1, len(tokens), 2):
-        if tokens[posicao] not in OPERADORES:
-            raise ValueError("Confira os operadores da busca.")
-
-    # 1. Calcula os grupos ligados por 'e'.
-    atual = filtros[tokens[0]]
-    grupos = []
-    operadores = []
-    for posicao in range(1, len(tokens), 2):
-        operador = tokens[posicao]
-        proximo = filtros[tokens[posicao + 1]]
-        if operador == "e":
-            atual = intersecao(atual, proximo)
-            etapas.append(f"Interseção: {len(atual)} combinação(ões).")
-        else:
-            grupos.append(atual)
-            operadores.append(operador)
-            atual = proximo
-    grupos.append(atual)
-
-    # 2. Resolve 'ou' e 'exceto' da esquerda para a direita.
-    resultado = grupos[0]
-    for posicao in range(len(operadores)):
-        proximo = grupos[posicao + 1]
-        resultado = aplicar_operacao(resultado, proximo, operadores[posicao])
-        etapas.append(f"Operação '{operadores[posicao]}': {len(resultado)} combinação(ões).")
-    return resultado
-
-
-def resolver_parenteses(tokens, filtros, etapas):
-    """Calcula um grupo interno e o substitui pelo conjunto resultante."""
-    while "(" in tokens:
-        # O último '(' indica o grupo mais interno ainda não resolvido.
-        inicio = 0
-        for posicao in range(len(tokens)):
-            if tokens[posicao] == "(":
-                inicio = posicao
-        if ")" not in tokens[inicio + 1:]:
-            raise ValueError("Falta fechar um parêntese.")
-        fim = tokens.index(")", inicio + 1)
-        nome_grupo = f"#grupo{inicio}"
-        filtros[nome_grupo] = resolver(tokens[inicio + 1:fim], filtros, etapas)
-        tokens[inicio:fim + 1] = [nome_grupo]
-    return tokens
+    while palavras:
+        if palavras[0] in OPERADORES:
+            tokens.append(palavras.pop(0))
+            continue
+        # Procura o nome completo, incluindo cidades com mais de uma palavra.
+        encontrou = False
+        for tamanho in range(len(palavras), 0, -1):
+            nome = " ".join(palavras[:tamanho])
+            if nome in termos:
+                tokens.append(nome)
+                palavras = palavras[tamanho:]
+                encontrou = True
+                break
+        if not encontrou:
+            raise ValueError("Termo não reconhecido. Consulte os dados importados.")
+    if len(tokens) == 2 and tokens[0] in termos and tokens[1] in termos:
+        tokens.insert(1, "e")
+    if len(tokens) == 1 and tokens[0] in termos:
+        return tokens
+    if len(tokens) == 3 and tokens[0] in termos and tokens[1] in OPERADORES and tokens[2] in termos:
+        return tokens
+    raise ValueError("Use um filtro ou dois filtros ligados por e, ou ou exceto.")
 
 
 def buscar(base, texto):
-    """Reconhece os termos, forma os conjuntos e calcula a resposta."""
     termos = criar_termos(base)
     tokens = separar_termos(texto, termos)
-    filtros = {}
-    etapas = []
-    for token in tokens:
-        if token in termos:
-            coluna, valor = termos[token]
-            filtros[token] = filtrar(base, coluna, valor)
-            etapas.append(f"Filtro {coluna} = {valor}: {len(filtros[token])} combinação(ões).")
-    tokens = resolver_parenteses(tokens, filtros, etapas)
-    resultado = resolver(tokens, filtros, etapas)
-    return resultado.sort_values(COLUNAS).reset_index(drop=True), etapas
-
-
-def apresentar(tabela):
-    """Agrupa os turnos apenas para exibir a resposta na página."""
-    cidades = {"sjc": "São José dos Campos", "bel": "Belém"}
-    linhas = []
-    for (companhia, cidade), grupo in tabela.groupby(["companhia", "cidade"], sort=True):
-        turnos = [turno for turno in ["manha", "tarde", "noite"] if turno in grupo["turno"].values]
-        linhas.append({"companhia": companhia.upper(), "cidade": cidades.get(cidade, cidade.title()),
-                       "turnos": ["manhã" if turno == "manha" else turno for turno in turnos]})
-    return linhas
+    coluna, valor = termos[tokens[0]]
+    resultado = filtrar(base, coluna, valor)
+    if len(tokens) == 3:
+        coluna, valor = termos[tokens[2]]
+        segundo = filtrar(base, coluna, valor)
+        resultado = aplicar_operacao(resultado, segundo, tokens[1])
+    return resultado.sort_values(COLUNAS)

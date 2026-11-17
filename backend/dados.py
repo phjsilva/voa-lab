@@ -1,111 +1,59 @@
-"""Lê, valida e salva os CSVs usados nas consultas."""
+"""Leitura dos CSVs, junção pela cidade e salvamento dos dados importados."""
 
-import csv
-from io import StringIO
 from pathlib import Path
-import re
-from shutil import copyfileobj
-from tempfile import TemporaryDirectory
-from uuid import uuid4
+import csv
 import pandas as pd
-
 from .consultas import COLUNAS, criar_termos, normalizar
 
 
-def ler_csv(caminho, colunas, normalizar_dados=True):
+def ler_csv(arquivo, colunas):
     try:
-        texto = caminho.read_text(encoding="utf-8-sig")
-    except UnicodeDecodeError as erro:
-        raise ValueError(f"{caminho.name}: salve o arquivo com codificação UTF-8.") from erro
-    primeira_linha = texto.splitlines()[0] if texto.splitlines() else ""
-    separador = ";" if ";" in primeira_linha and "," not in primeira_linha else ","
-    validar_formato_csv(texto, separador, colunas, caminho.name)
-    tabela = pd.read_csv(StringIO(texto), sep=separador, dtype=str, keep_default_na=False)
-    if not normalizar_dados:
-        return tabela  # Na página, preserva a escrita, a ordem e as linhas do arquivo.
+        tabela = pd.read_csv(arquivo, sep=None, engine="python", dtype=str, keep_default_na=False, encoding="utf-8-sig")
+    except (ValueError, UnicodeError, csv.Error) as erro:
+        raise ValueError("Envie um CSV válido, em UTF-8, com vírgula ou ponto e vírgula.") from erro
+    if list(tabela.columns) != colunas:
+        raise ValueError("Cabeçalho esperado: " + ",".join(colunas) + ".")
+    if tabela.empty or not isinstance(tabela.index, pd.RangeIndex):
+        raise ValueError("Inclua linhas de dados com duas colunas.")
     for coluna in colunas:
-        tabela[coluna] = tabela[coluna].map(normalizar)
-        if tabela[coluna].eq("").any():
-            raise ValueError(f"{caminho.name}: há valores vazios em {coluna}.")
-    return tabela.drop_duplicates()
+        if tabela[coluna].isna().any() or tabela[coluna].map(normalizar).eq("").any():
+            raise ValueError("Preencha todos os valores do CSV.")
+    return tabela
 
 
-def validar_formato_csv(texto, separador, colunas, nome_arquivo):
-    try:
-        linhas = [linha for linha in csv.reader(StringIO(texto), delimiter=separador, strict=True) if linha]
-    except csv.Error as erro:
-        raise ValueError(f"{nome_arquivo}: o conteúdo não é um CSV válido.") from erro
-    if not linhas or linhas[0] != colunas:
-        raise ValueError(f"{nome_arquivo}: cabeçalho esperado: {','.join(colunas)}.")
-    if len(linhas) < 2:
-        raise ValueError(f"{nome_arquivo}: inclua pelo menos uma linha de dados.")
-    if any(len(linha) != len(colunas) for linha in linhas[1:]):
-        raise ValueError(f"{nome_arquivo}: cada linha deve conter {len(colunas)} valores.")
-
-
-def ler_base(pasta):
-    pasta = Path(pasta)
-    companhias = ler_csv(pasta / "companhias.csv", ["companhia", "cidade"])
-    cidades = ler_csv(pasta / "cidades.csv", ["cidade", "turno"])
-    if not cidades["turno"].isin(["manha", "tarde", "noite"]).all():
-        raise ValueError("Os turnos do CSV devem ser manhã, tarde ou noite.")
-    faltantes = companhias.loc[~companhias["cidade"].isin(cidades["cidade"]), "cidade"]
-    if not faltantes.empty:
-        raise ValueError("Cidades sem turno em cidades.csv: " + ", ".join(sorted(faltantes.unique())))
-    # Junção: relaciona cada companhia aos turnos da mesma cidade.
-    base = companhias.merge(cidades, on="cidade")[COLUNAS].drop_duplicates().reset_index(drop=True)
-    criar_termos(base)  # Valida os nomes antes de permitir uma importação.
+def ler_base(companhias, cidades):
+    companhias = companhias.copy()
+    cidades = cidades.copy()
+    for tabela in [companhias, cidades]:
+        for coluna in tabela.columns:
+            tabela[coluna] = tabela[coluna].map(normalizar)
+    for turno in cidades["turno"]:
+        if turno not in ["manha", "tarde", "noite"]:
+            raise ValueError("Use os turnos manhã, tarde ou noite.")
+    for cidade in companhias["cidade"]:
+        if cidade not in cidades["cidade"].values:
+            raise ValueError(f"Cidade sem turno em cidades.csv: {cidade}.")
+    base = companhias.merge(cidades, on="cidade")
+    base = base[COLUNAS].drop_duplicates()
+    criar_termos(base)
     return base
 
 
-def pasta_ativa(pasta):
-    pasta = Path(pasta)
-    marcador = pasta / ".base_ativa"
-    if not marcador.exists():
-        return None
-    identificador = marcador.read_text(encoding="ascii").strip()
-    if not re.fullmatch(r"[a-f0-9]{32}", identificador):
-        raise ValueError("Identificador de base importada inválido.")
-    return pasta / ".importacoes" / identificador
-
-
 def carregar_base(pasta):
-    ativa = pasta_ativa(pasta)
-    if ativa is None:
-        return pd.DataFrame(columns=COLUNAS), False
-    return ler_base(ativa), True
-
-
-def carregar_csvs(pasta):
-    """Retorna as linhas de cada CSV para exibir nas tabelas do site."""
-    ativa = pasta_ativa(pasta)
-    if ativa is None:
-        return [], []
-    companhias = ler_csv(ativa / "companhias.csv", ["companhia", "cidade"], normalizar_dados=False)
-    cidades = ler_csv(ativa / "cidades.csv", ["cidade", "turno"], normalizar_dados=False)
-    return companhias.to_dict(orient="records"), cidades.to_dict(orient="records")
+    pasta = Path(pasta)
+    companhias = pd.DataFrame(columns=["companhia", "cidade"])
+    cidades = pd.DataFrame(columns=["cidade", "turno"])
+    if (pasta / "companhias.csv").exists() and (pasta / "cidades.csv").exists():
+        companhias = ler_csv(pasta / "companhias.csv", ["companhia", "cidade"])
+        cidades = ler_csv(pasta / "cidades.csv", ["cidade", "turno"])
+    return companhias, cidades, ler_base(companhias, cidades)
 
 
 def importar_csvs(pasta, companhias, cidades):
+    companhias = ler_csv(companhias, ["companhia", "cidade"])
+    cidades = ler_csv(cidades, ["cidade", "turno"])
+    ler_base(companhias, cidades)  # Confere os dois CSVs antes de substituir os dados.
     pasta = Path(pasta)
     pasta.mkdir(parents=True, exist_ok=True)
-    with TemporaryDirectory(prefix=".validacao-", dir=pasta) as temporaria:
-        preparo = Path(temporaria)
-        for stream, nome in [(companhias, "companhias.csv"), (cidades, "cidades.csv")]:
-            with (preparo / nome).open("wb") as arquivo:
-                copyfileobj(stream, arquivo)
-        ler_base(preparo)  # Só salva a nova base quando os dois arquivos são válidos.
-        identificador = uuid4().hex
-        importacoes = pasta / ".importacoes"
-        importacoes.mkdir(exist_ok=True)
-        destino = importacoes / identificador
-        preparo.rename(destino)
-        try:
-            marcador = pasta / f".base_ativa.{identificador}.tmp"
-            marcador.write_text(identificador, encoding="ascii")
-            marcador.replace(pasta / ".base_ativa")
-        except OSError:
-            for arquivo in destino.iterdir():
-                arquivo.unlink()
-            destino.rmdir()
-            raise
+    companhias.to_csv(pasta / "companhias.csv", index=False)
+    cidades.to_csv(pasta / "cidades.csv", index=False)

@@ -1,32 +1,22 @@
-VERIFICAÇÃO DO PROJETO SEM CSVs INICIAIS
+VERIFICAÇÃO DA VERSÃO SIMPLES — 16/11/2026
 
-47 testes aprovados.
+21 testes aprovados.
 
-- A página inicial funciona sem arquivos CSV cadastrados.
-- A busca só aparece após a importação de dois CSVs válidos.
-- Consultar antes da importação devolve uma mensagem de orientação.
-- A primeira importação ativa os dados sem reiniciar o servidor.
-- Os dados importados persistem após reiniciar a aplicação.
-- Uma primeira importação inválida mantém o estado sem dados.
-- CSVs soltos em data/ não são carregados automaticamente.
-- Os modelos para download contêm somente os cabeçalhos.
-- Não existe mais a rota de restauração de uma base de exemplo.
-- Os testes matemáticos usam dados temporários próprios, sem base pré-carregada no site.
+- Os cinco exemplos de busca do enunciado foram verificados.
+- Junção pela cidade e operações de conjuntos com as três colunas.
+- União sem repetições e diferença sem misturar companhias.
+- Maiúsculas, acentos, apelidos e cidades com várias palavras.
+- Busca sem correspondências retorna uma tabela vazia.
+- Parênteses e cadeias de operações são recusados: não fazem parte desta versão.
+- CSVs UTF-8, vírgula ou ponto e vírgula, cabeçalhos e valores preenchidos.
+- Turnos válidos e cidades relacionadas nos dois CSVs.
+- Dados inválidos são recusados antes de substituir os arquivos atuais.
+- Persistência nos dois CSVs após reiniciar o servidor.
+- Tabelas dos CSVs preservam a escrita, as repetições e cidades sem companhia.
+- Limite de 2 MB e recusa de envio de formulários de outra origem.
+- Página inicial e apresentação funcionam sem CSVs importados.
+- Modelos vazios servidos pelo frontend.
 
-- As duas tabelas exibem as linhas dos CSVs importados, sem filtrar pela busca.
-- Escrita, ordem, repetições e cidades sem companhia foram verificadas.
-
-- A página /apresentacao funciona sem dados importados.
-- Os trechos de código são obtidos diretamente dos arquivos Python.
-- O menu conecta a busca à página de códigos.
-
-- Guia por abas com funções inteiras, linhas reais e destaques.
-- Navegação anterior/próximo e atalhos de teclado.
-- Os exemplos usam somente CSVs importados pelo usuário.
-
-SIMPLIFICAÇÃO DIDÁTICA
-- Filtrar e contar elementos em funções próprias e curtas.
-- Escolha das operações com if, sem dicionário de funções.
-- Resolução explícita de interseções antes de uniões e diferenças.
-- Parênteses e validação de CSV em funções auxiliares.
-- 47 testes aprovados e 115 buscas comparadas com a versão anterior.
+Os testes anteriores de histórico de versões, sessões, precedência e parênteses
+foram substituídos pelos testes do escopo simples, pois esses recursos foram
+retirados a pedido do usuário. Os cartões de código são conteúdo do frontend.

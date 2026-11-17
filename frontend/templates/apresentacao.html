@@ -1,3 +1,4 @@
+{% from 'codigos.html' import codigos %}
 {% macro etapa(id, numero) %}
 <section id="painel-{{ id }}" class="conteudo-aula" role="tabpanel" aria-labelledby="aba-{{ id }}" {% if numero != 1 %}hidden{% endif %}>
     <article class="explicacao-aula">
@@ -5,21 +6,32 @@
         {{ caller() }}
         <div class="demo-aula">
             <strong>Veja na aplicação</strong>
-            {% if exemplos.get(id) %}
-            <p>O exemplo usa os CSVs que você já importou.</p>
-            <a href="{{ exemplos[id] }}" target="_blank" rel="noopener">Testar com meus CSVs ↗</a>
-            {% else %}
-            <p>Importe seus dois CSVs para demonstrar esta etapa com dados reais.</p>
-            <a href="{{ url_for('index') }}#importar-csv" target="_blank" rel="noopener">Abrir importação ↗</a>
-            {% endif %}
+            <p>Importe seus CSVs e teste os exemplos da página de busca.</p>
+            <a href="{{ url_for('index') }}" target="_blank" rel="noopener">Abrir busca ↗</a>
         </div>
     </article>
-    <figure class="janela-codigo">
-        <div class="barra-codigo"><span>{{ codigos[id].arquivo }}</span><span>{{ codigos[id].funcao }}()</span></div>
-        <p class="escopo-codigo">Função completa · {{ codigos[id].linhas|length }} linhas · numeração do arquivo original</p>
-        <pre tabindex="0" aria-label="Código completo de {{ codigos[id].funcao }}"><code>{% for linha in codigos[id].linhas %}<span class="linha-codigo{% if linha.destaque %} destaque{% endif %}"><span class="numero-linha" aria-hidden="true">{{ linha.numero }}</span>{{ linha.texto or ' ' }}</span>{% endfor %}</code></pre>
-        <figcaption>As linhas destacadas estão relacionadas ao conceito desta etapa.</figcaption>
-    </figure>
+    <div class="bloco-codigo">
+        <div class="acoes-codigo" role="group" aria-label="Ações do código de {{ codigos[id].funcao }}">
+            <span>PYTHON <span aria-hidden="true">/</span> {{ '%02d'|format(numero) }}</span>
+            <div>
+                <button type="button" class="copiar-codigo">Copiar código</button>
+                <button type="button" class="focar-codigo" aria-pressed="false">Ampliar código ↗</button>
+            </div>
+        </div>
+        <div class="captura-codigo">
+            <figure class="janela-codigo">
+                <div class="barra-codigo">
+                    <span class="controles-janela" aria-hidden="true"><i></i><i></i><i></i></span>
+                    <span class="arquivo-codigo">{{ codigos[id].arquivo }}</span>
+                    <span class="linguagem-codigo">Python</span>
+                </div>
+                <p class="escopo-codigo">{{ codigos[id].funcao }}() <span>· {{ codigos[id].linhas|length }} linhas</span></p>
+                <pre tabindex="0" aria-label="Código completo de {{ codigos[id].funcao }}"><code>{% for linha in codigos[id].linhas %}<span class="linha-codigo{% if linha.destaque %} destaque{% endif %}"><span class="numero-linha" aria-hidden="true">{{ linha.numero }}</span><span class="texto-codigo">{{ linha.texto }}</span></span>{% endfor %}</code></pre>
+                <figcaption>Função completa · linhas do arquivo original</figcaption>
+            </figure>
+        </div>
+        <p class="aviso-codigo" role="status" aria-live="polite"></p>
+    </div>
 </section>
 {% endmacro %}
 <!doctype html>
@@ -45,7 +57,7 @@
     <section class="intro introducao-aula">
         <p class="sobretitulo">DO CSV AOS CONJUNTOS</p>
         <h1>Entenda a lógica.<br />Uma etapa de cada vez.</h1>
-        <p class="descricao">Escolha um conceito para acompanhar a explicação e a função completa que o implementa.</p>
+        <p class="descricao">Escolha uma etapa para acompanhar a explicação e o código. Amplie o cartão para apresentar ou fazer uma captura.</p>
     </section>
 
     <section class="aula" aria-label="Guia do código de busca de voos">
@@ -59,14 +71,14 @@
         <p class="conceito-aula">Conceito: representação dos dados</p>
         <h2>Os dados começam nos CSVs.</h2>
         <p>A função <code>ler_csv</code> recebe um arquivo, confere seu formato e transforma as linhas em uma tabela do Pandas.</p>
-        <p class="detalhe-aula">A linha <code>pd.read_csv</code> faz a leitura. Depois, os valores são normalizados para a busca e <code>drop_duplicates()</code> remove repetições. A exibição dos arquivos usa os valores originais.</p>
+        <p class="detalhe-aula">A linha <code>pd.read_csv</code> faz a leitura e as condições conferem as duas colunas. A função <code>ler_base</code> padroniza os valores para a busca e remove repetições. A exibição dos CSVs usa a escrita original.</p>
         <dl class="termos-aula"><div><dt>DataFrame</dt><dd>Tabela de linhas e colunas utilizada pelo Pandas.</dd></div><div><dt>Elemento repetido</dt><dd>Não é contado novamente quando formamos um conjunto.</dd></div></dl>
         {% endcall %}
 
         {% call etapa('juncao', 2) %}
         <p class="conceito-aula">Conceito: relação entre tabelas</p>
         <h2>Uma cidade liga as duas tabelas.</h2>
-        <p>Um CSV informa companhia e cidade. O outro informa cidade e turno. A função <code>ler_base</code> associa as informações pela cidade.</p>
+        <p>Um CSV informa companhia e cidade. O outro informa cidade e turno. A função <code>ler_base</code> recebe as duas tabelas e associa as informações pela cidade.</p>
         <p class="detalhe-aula">O <code>merge(..., on="cidade")</code> forma triplas <strong>(companhia, cidade, turno)</strong>. Se uma cidade tem dois turnos, cada companhia dessa cidade gera duas combinações.</p>
         <dl class="termos-aula"><div><dt>Junção</dt><dd>Relaciona linhas que têm a mesma cidade; não combina todas indiscriminadamente.</dd></div><div><dt>Tripla ordenada</dt><dd>Um elemento identificado pelas três colunas juntas.</dd></div></dl>
         {% endcall %}
@@ -75,7 +87,7 @@
         <p class="conceito-aula">Conceito: subconjuntos</p>
         <h2>Cada filtro forma um conjunto.</h2>
         <p>A função <code>filtrar</code> seleciona as linhas que atendem a uma condição. Uma companhia pode formar A; um turno pode formar B.</p>
-        <p class="detalhe-aula"><code>base[coluna] == valor</code> verifica a condição. <code>base.loc[...]</code> devolve somente as linhas selecionadas. A função <code>buscar</code> usa esse filtro para formar os conjuntos.</p>
+        <p class="detalhe-aula"><code>base[coluna] == valor</code> identifica as linhas que atendem ao filtro. <code>base[...]</code> devolve essas linhas. A função <code>buscar</code> usa esse filtro para formar os conjuntos.</p>
         <dl class="termos-aula"><div><dt>Subconjunto</dt><dd>Conjunto formado por elementos retirados da base.</dd></div><div><dt>Condição do filtro</dt><dd>Regra como companhia igual ao nome informado.</dd></div></dl>
         {% endcall %}
 
@@ -107,8 +119,8 @@
         <p class="conceito-aula">Conceito: operadores de conjuntos</p>
         <h2>Cada palavra escolhe uma operação.</h2>
         <p>A função <code>aplicar_operacao</code> usa condições simples: “e” chama a interseção, “ou” chama a união e “exceto” chama a diferença.</p>
-        <p class="detalhe-aula">A busca resolve os parênteses primeiro, depois a interseção e, por último, união e diferença. Para excluir manhã e noite, use <code>companhia exceto (manha ou noite)</code>.</p>
-        <dl class="termos-aula"><div><dt>Prioridade</dt><dd>A interseção é calculada antes da união e da diferença.</dd></div><div><dt>Mesma prioridade</dt><dd>“Ou” e “exceto” são resolvidos da esquerda para a direita.</dd></div></dl>
+        <p class="detalhe-aula">Cada busca aceita um filtro ou dois filtros ligados por um operador. Por exemplo, <code>voos latam e noite</code> seleciona a companhia e o turno. Dois termos sem operador, como <code>latam sjc</code>, usam “e”.</p>
+        <dl class="termos-aula"><div><dt>Um operador</dt><dd>Escolha “e”, “ou” ou “exceto” entre os dois filtros.</dd></div><div><dt>Busca simples</dt><dd>Parênteses e cadeias de operações não fazem parte desta versão.</dd></div></dl>
         {% endcall %}
 
         {% call etapa('cardinalidade', 8) %}
@@ -116,7 +128,7 @@
         <h2>Quantos elementos sobraram?</h2>
         <p>A função <code>cardinalidade</code> usa <code>len(conjunto)</code> para contar os elementos. O site chama essa função depois da busca e mostra a quantidade encontrada.</p>
         <p class="detalhe-aula"><strong>|A ∪ B| = |A| + |B| − |A ∩ B|</strong>. Subtraímos a interseção para não contar os elementos comuns duas vezes.</p>
-        <dl class="termos-aula"><div><dt>Cardinalidade</dt><dd>Quantidade de elementos de um conjunto.</dd></div><div><dt>Linhas visuais</dt><dd>Os turnos são agrupados na página; uma linha pode representar várias combinações.</dd></div></dl>
+        <dl class="termos-aula"><div><dt>Cardinalidade</dt><dd>Quantidade de elementos de um conjunto.</dd></div><div><dt>Linhas visuais</dt><dd>Cada linha da tabela representa uma combinação. A quantidade de linhas é a cardinalidade do resultado.</dd></div></dl>
         {% endcall %}
 
         <div class="navegacao-aula">
