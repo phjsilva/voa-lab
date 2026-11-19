@@ -1,0 +1,139 @@
+.pagina-teoria { --azul: #91b8f5; --azul-suave: #26364f; background: var(--paper); }
+.pagina-teoria main { max-width: 1320px; }
+.pagina-teoria .navegacao-paginas a { font-size: .875rem; }
+.abertura-teoria { display: flex; justify-content: space-between; align-items: end; gap: 24px; padding: 30px 0 24px; }
+.abertura-teoria h1 { font-size: clamp(1.6rem, 3vw, 2.5rem); letter-spacing: -.06em; margin: 8px 0 0; }
+.abertura-teoria .sobretitulo { margin: 0; }
+.identificacao-aula { color: var(--muted); white-space: nowrap; font-size: .875rem; }
+.trilha { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 18px; }
+.trilha button { display: flex; align-items: center; gap: 7px; border: 1px solid var(--line); background: transparent; color: var(--muted); border-radius: 8px; padding: 8px 10px; font: inherit; font-size: .875rem; cursor: pointer; }
+.trilha button[aria-selected="true"] { background: var(--accent); color: var(--paper); border-color: var(--accent); }
+.indice-trilha { opacity: .7; font-variant-numeric: tabular-nums; }
+.palco { background: var(--surface); border: 1px solid var(--line); border-radius: 20px; overflow: hidden; }
+.slide { display: grid; grid-template-columns: minmax(0, .95fr) minmax(0, 1.15fr); min-height: 500px; }
+.slide[hidden] { display: none; }
+.texto-slide { padding: clamp(24px, 3vw, 44px); align-self: center; }
+.tema-slide { color: var(--accent); font-size: .875rem; letter-spacing: .08em; font-weight: 700; margin: 0 0 16px; }
+.texto-slide h2 { font-size: clamp(1.9rem, 3vw, 2.8rem); line-height: 1.12; letter-spacing: -.045em; margin: 0 0 20px; font-weight: 650; }
+.texto-slide > p:not(.tema-slide) { color: var(--muted); margin: 14px 0; }
+.texto-slide strong { color: var(--ink); }
+.visual-slide { display: flex; flex-direction: column; justify-content: center; min-width: 0; padding: 28px; background: var(--surface-raised); border-left: 1px solid var(--line); }
+.ideia-chave { border-left: 3px solid var(--accent); padding: 4px 0 4px 16px; margin-top: 24px; }
+.ideia-chave > span,.consulta-exemplo > span { display: block; color: var(--muted); font-size: .875rem; margin-bottom: 6px; }
+.ideia-chave strong { display: block; font-weight: 600; }
+.ideia-chave code { overflow-wrap: anywhere; }
+.etiqueta-visual { display: block; font-size: .875rem; letter-spacing: .09em; font-weight: 650; color: var(--muted); text-align: center; margin-bottom: 22px; }
+.colecao-chaves { display: flex; align-items: center; justify-content: center; gap: 12px; }
+.colecao-chaves > div { display: grid; gap: 12px; flex: 1; max-width: 310px; }
+.chave { font-size: clamp(4rem, 8vw, 7rem); font-weight: 300; color: var(--accent); }
+.bilhete { display: flex; align-items: center; gap: 14px; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 16px; min-width: 0; }
+.bilhete > strong { font-size: 1rem; color: var(--ink); background: var(--surface-raised); border-radius: 6px; padding: 5px 8px; }
+.bilhete > div { min-width: 0; flex: 1; }
+.bilhete b { display: block; font-weight: 650; }
+.bilhete span { display: block; color: var(--muted); font-size: .875rem; }
+.bilhete .mini-aviao { color: var(--accent); font-size: 1.4rem; }
+.legenda-visual { text-align: center; color: var(--muted); margin: 22px 0 0; }
+.tripla { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 8px; margin: 32px 0; }
+.tripla > div { text-align: center; border-bottom: 3px solid var(--accent); padding: 12px 0; }
+.tripla span { display: block; font-size: .875rem; color: var(--muted); }
+.tripla strong { display: block; font-size: clamp(1.1rem,2vw,1.6rem); margin-top: 8px; }
+.comparacao-bilhetes { display: grid; gap: 12px; }
+.universo { border: 1px dashed var(--muted); padding: 22px; border-radius: 12px; }
+.titulo-universo { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 20px; }
+.titulo-universo > strong { font-size: 1.8rem; }
+.titulo-universo > span { flex: 1; }
+.titulo-universo > b { font-size: .875rem; font-weight: 500; color: var(--muted); }
+.grade-bilhetes { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 10px; }
+.universo .bilhete { padding: 12px; gap: 8px; }
+.universo .mini-aviao { display: none; }
+.filtro-consulta { display: flex; justify-content: center; flex-wrap: wrap; gap: 12px; color: var(--muted); font-size: .875rem; }
+.conjunto-simples { display: flex; align-items: center; justify-content: center; gap: 30px; margin: 28px 0; }
+.circulo-a { border-radius: 50%; aspect-ratio: 1; width: 65%; max-width: 280px; background: #233c2e; border: 2px solid #90c9a6; display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 20px; }
+.circulo-a > div { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; }
+.circulo-a > div span,.elementos-fora > span { background: var(--surface); padding: 6px 10px; border-radius: 6px; border: 1px solid var(--line); }
+.elementos-fora { display: flex; flex-direction: column; align-items: center; gap: 8px; }
+.elementos-fora small { font-size: .875rem; text-align: center; color: var(--muted); }
+.notacao { display: grid; grid-template-columns: auto 1fr; align-items: baseline; gap: 12px; margin-top: 24px; }
+.notacao > span { font-size: 1.3rem; font-weight: 650; }
+.notacao > p { font-size: .875rem; color: var(--muted); margin: 0; }
+.diagrama { position: relative; width: 100%; aspect-ratio: 720 / 400; margin: 16px 0; }
+.venn { position: absolute; inset: 0; width: 100%; height: 100%; }
+.base-a { fill: #335844; fill-opacity: .45; }
+.base-b { fill: #304d7a; fill-opacity: .45; }
+.borda-a { fill: none; stroke: #90c9a6; stroke-width: 2; }
+.borda-b { fill: none; stroke: var(--azul); stroke-width: 2; }
+.regiao-selecionada { fill: #79aebd; fill-opacity: .3; }
+.rotulo-a,.rotulo-b { position: absolute; top: 0; font-weight: 700; transform: translateX(-50%); white-space: nowrap; }
+.rotulo-a { left: 30%; color: #90c9a6; }
+.rotulo-b { left: 70%; color: var(--azul); }
+.rotulo-a span,.rotulo-b span { font-weight: 500; margin-left: 6px; }
+.ponto { position: absolute; transform: translate(-50%,-50%); display: flex; gap: 4px; align-items: center; justify-content: center; color: var(--ink); font-size: .875rem; padding: 4px 7px; border-radius: 6px; background: #181c21dd; font-weight: 600; }
+.ponto.selecionado { background: var(--paper); color: var(--ink); }
+.v1 { left: 50%; top: 48.75%; }.v2 { left: 29%; top: 38%; }.v3 { left: 29%; top: 62%; }.v4 { left: 71%; top: 48.75%; }.v5 { left: 43%; top: 92%; }.v6 { left: 57%; top: 92%; }
+.fora-conjuntos { position: absolute; left: 50%; top: 104%; transform: translateX(-50%); white-space: nowrap; font-size: .875rem; color: var(--muted); }
+.resultado-visual { margin-top: 42px; border-top: 1px solid var(--line); padding: 18px 0 0; }
+.resultado-visual > span { display: block; font-size: .875rem; color: var(--muted); margin-bottom: 8px; }
+.resultado-visual > strong { display: block; font-size: clamp(1.1rem,2vw,1.5rem); font-weight: 650; }
+.resultado-visual small { display: block; font-size: .875rem; font-weight: 400; color: var(--muted); margin-top: 4px; }
+.consulta-exemplo { background: var(--surface-raised); border-radius: 8px; padding: 12px 16px; margin: 20px 0; }
+.consulta-exemplo code { font-size: 1rem; overflow-wrap: anywhere; }
+.ponte-codigo { margin-top: 24px; font-size: .875rem; }
+.ponte-codigo summary { cursor: pointer; text-underline-offset: 4px; }
+.ponte-codigo a,.link-pratica { color: var(--ink); text-underline-offset: 4px; }
+.link-pratica { align-self: start; margin-top: 16px; font-size: .875rem; }
+.conta-uniao { margin: 24px 0; }
+.conta-uniao span { display: block; font-size: 1rem; }
+.conta-uniao strong { display: block; font-size: 2rem; letter-spacing: -.04em; margin-top: 8px; }
+.controle-aula { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 20px 0; }
+.controle-aula button { font: inherit; font-size: .875rem; font-weight: 600; background: var(--surface); border: 1px solid var(--line); border-radius: 9px; color: var(--ink); padding: 12px 22px; cursor: pointer; }
+.controle-aula .botao-principal { background: var(--accent); border-color: var(--accent); color: var(--paper); }
+.controle-aula button:disabled { opacity: .4; cursor: default; }
+.controle-aula > div { text-align: center; font-size: .875rem; }
+#teoria-posicao { font-variant-numeric: tabular-nums; display: block; }
+.dica-teclado { display: block; color: var(--muted); font-size: .875rem; }
+.referencia-voos { border-top: 1px solid var(--line); padding-top: 14px; }
+.referencia-voos summary { cursor: pointer; font-size: .875rem; }
+.referencia-voos .grade-bilhetes { margin-top: 16px; grid-template-columns: repeat(3,minmax(0,1fr)); }
+.referencia-voos p { color: var(--muted); font-size: .875rem; }
+.escolha-csv { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 22px; }
+.escolha-csv button,.controles-leitura button { font: inherit; font-size: .875rem; cursor: pointer; border: 1px solid var(--line); border-radius: 8px; padding: 10px 14px; background: var(--surface); color: var(--ink); }
+.escolha-csv button[aria-pressed="true"] { background: var(--accent); color: var(--paper); border-color: var(--accent); }
+.titulo-csv { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 12px; margin-bottom: 10px; }
+.titulo-csv > span { color: var(--muted); font-size: .875rem; }
+.titulo-csv > strong { font-size: .875rem; font-weight: 650; }
+.fonte-csv { background: var(--paper); color: var(--ink); padding: 12px 0; border-radius: 10px; }
+.fonte-csv > div { display: flex; gap: 16px; padding: 5px 16px; border-left: 3px solid transparent; }
+.fonte-csv > div > span { color: var(--muted); width: 16px; flex-shrink: 0; font-size: .875rem; text-align: end; }
+.fonte-csv code { font-size: .9375rem; overflow-wrap: anywhere; color: inherit; }
+.fonte-csv .linha-lida { color: var(--muted); }
+.fonte-csv .linha-ativa { background: var(--surface-raised); border-left-color: var(--accent); color: var(--accent); }
+.ligacao-csv { display: flex; justify-content: center; align-items: center; gap: 12px; padding: 12px 0; color: var(--muted); font-size: .875rem; }
+.ligacao-csv > span { font-size: 1.5rem; }
+.destino-csv { min-height: 108px; background: var(--surface); border: 1px solid var(--line); border-radius: 9px; overflow: hidden; }
+.destino-csv > p { margin: 0; padding: 22px 16px; color: var(--muted); font-size: .875rem; }
+.tabela-didatica { width: 100%; border-collapse: collapse; font-size: .875rem; margin-top: 0; }
+.tabela-didatica th,.tabela-didatica td { padding: 8px 10px; text-align: left; border-bottom: 1px solid var(--line); font-size: .875rem; }
+.tabela-didatica th { color: var(--ink); background: var(--surface-raised); text-transform: none; letter-spacing: normal; font-weight: 600; }
+.tabela-didatica td { color: var(--ink); background: var(--surface); }
+.tabela-didatica .linha-ativa th,.tabela-didatica .linha-ativa td { background: #29374f; }
+.tabela-didatica tr:last-child td { border-bottom: 0; }
+.controles-leitura { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 18px; }
+.controles-leitura .acao-csv { background: var(--accent); color: var(--paper); border-color: var(--accent); }
+.controles-leitura button:disabled { opacity: .55; cursor: default; }
+.estado-leitura { font-size: .875rem; color: var(--ink); margin: 14px 0 0; }
+.pagina-teoria .nota-demonstracao { font-size: .875rem; color: var(--muted); }
+.tabelas-origem { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 14px; }
+.tabelas-origem > div { min-width: 0; }
+.tabelas-origem h3 { font-size: .875rem; font-weight: 650; margin: 0 0 8px; }
+.tabelas-origem .coluna-chave { background: #26364f; color: var(--azul); }
+.tabelas-origem .linha-ativa td { background: #29374f; }
+.tabelas-origem .linha-ativa .coluna-chave { background: #30486a; }
+.chave-juncao { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: center; gap: 4px 10px; margin: 18px 0; font-size: .875rem; color: var(--muted); }
+.chave-juncao code { color: var(--azul); font-weight: 650; }
+.somente-leitor { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; border: 0; }
+@media (max-width: 1000px) and (min-width: 721px) { .tabelas-origem { grid-template-columns: 1fr; } }
+@media (max-width: 450px) { .tabelas-origem { grid-template-columns: 1fr; }.tabela-didatica th,.tabela-didatica td { padding: 8px 6px; }.escolha-csv button,.controles-leitura button { padding: 10px; } }
+@media (max-width: 950px) { .slide { grid-template-columns: 1fr 1fr; }.visual-slide { padding: 20px; }.universo { padding: 14px; }.universo .grade-bilhetes { grid-template-columns: 1fr; }.bilhete .mini-aviao { display: none; }.identificacao-aula { display: none; } }
+@media (max-width: 720px) { .pagina-teoria main { padding: 0 18px; }.slide { grid-template-columns: 1fr; min-height: 0; }.texto-slide { padding: 26px; }.visual-slide { border-left: 0; border-top: 1px solid var(--line); padding: 28px 22px; }.universo .grade-bilhetes { grid-template-columns: repeat(2,minmax(0,1fr)); }.trilha button { padding: 7px 9px; }.abertura-teoria { padding: 24px 0; }.trilha { gap: 6px; }.referencia-voos .grade-bilhetes { grid-template-columns: repeat(2,minmax(0,1fr)); }.dica-teclado { display: none; }.controle-aula button { padding: 12px 14px; }.resultado-visual { margin-top: 38px; }.pagina-teoria footer { gap: 12px; flex-wrap: wrap; } }
+@media (max-width: 390px) { .pagina-teoria main { padding: 0 12px; }.visual-slide { padding: 24px 14px; }.texto-slide { padding: 24px 20px; }.universo .grade-bilhetes,.referencia-voos .grade-bilhetes { grid-template-columns: 1fr; }.rotulo-a,.rotulo-b { font-size: .875rem; }.ponto { padding: 2px 4px; gap: 2px; }.check { font-size: .75rem; }.conjunto-simples { gap: 14px; }.circulo-a > div { gap: 4px; }.circulo-a > div span { padding: 4px 6px; }.colecao-chaves { gap: 6px; } }
+@media (prefers-reduced-motion: no-preference) { .slide:not([hidden]) { animation: entrar-slide .22s ease-out; } @keyframes entrar-slide { from { opacity: .5; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } } }

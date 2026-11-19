@@ -1,10 +1,12 @@
 :root {
-    color-scheme: light;
-    --ink: #143e3b;
-    --muted: #536b66;
-    --line: #dbe5df;
-    --paper: #f6f8f3;
-    --accent: #d9f476;
+    color-scheme: dark;
+    --ink: #edf0f4;
+    --muted: #acb6c3;
+    --line: #343c46;
+    --paper: #101216;
+    --accent: #b7c9ff;
+    --surface: #181c21;
+    --surface-raised: #222830;
 }
 .atalho-importacao {
     display: inline-block;
@@ -51,9 +53,9 @@
     color: var(--ink);
 }
 .arquivo-csv input::file-selector-button {
-    border: 1px solid #b8ccc0;
+    border: 1px solid var(--line);
     border-radius: 6px;
-    background: white;
+    background: var(--surface);
     padding: 9px 10px;
     margin-right: 9px;
     color: var(--ink);
@@ -151,12 +153,13 @@ header {
 .navegacao-paginas a[aria-current="page"] {
     background: var(--accent);
     border-color: var(--accent);
+    color: var(--paper);
     font-weight: 650;
 }
 .marca {
-    font-size: 23px;
-    font-weight: 850;
-    letter-spacing: -1px;
+    font-size: clamp(1rem, 2.5vw, 1.35rem);
+    font-weight: 700;
+    letter-spacing: -0.5px;
     color: var(--ink);
     text-decoration: none;
 }
@@ -174,7 +177,7 @@ header {
     letter-spacing: 2px;
     font-size: 12px;
     font-weight: 700;
-    color: #5c7230;
+    color: var(--accent);
 }
 h1 {
     font-size: clamp(36px, 5vw, 56px);
@@ -197,8 +200,8 @@ label {
 .busca {
     display: flex;
     gap: 8px;
-    background: white;
-    border: 1px solid #b8ccc0;
+    background: var(--surface);
+    border: 1px solid var(--line);
     border-radius: 14px;
     padding: 8px;
     box-shadow: 0 8px 30px #143e3b06;
@@ -229,7 +232,7 @@ a:focus-visible,
 button:focus-visible,
 input:focus-visible,
 summary:focus-visible {
-    outline: 3px solid #4f7620;
+    outline: 3px solid var(--accent);
     outline-offset: 3px;
 }
 .exemplos {
@@ -245,7 +248,7 @@ summary:focus-visible {
     color: var(--ink);
     text-decoration: none;
     font-size: 12px;
-    background: #fff8;
+    background: var(--surface);
 }
 .exemplos a:hover {
     background: var(--accent);
@@ -263,7 +266,7 @@ summary:focus-visible {
 }
 .operadores article {
     border: 1px solid var(--line);
-    background: white;
+    background: var(--surface);
     border-radius: 14px;
     padding: 22px;
 }
@@ -294,13 +297,13 @@ h2 small {
 }
 code {
     font-size: 12px;
-    color: #496025;
+    color: var(--accent);
 }
 .regra {
     margin: 15px 0 30px;
 }
 .painel {
-    background: white;
+    background: var(--surface);
     border: 1px solid var(--line);
     padding: 24px;
     border-radius: 16px;
@@ -340,14 +343,14 @@ th {
 th,
 td {
     padding: 14px 8px;
-    border-bottom: 1px solid #eaf0eb;
+    border-bottom: 1px solid var(--line);
 }
 tr:last-child td {
     border: 0;
 }
 .turno {
     display: inline-block;
-    background: #edf3e4;
+    background: var(--surface-raised);
     border-radius: 6px;
     margin: 2px 4px 2px 0;
     padding: 3px 9px;

@@ -1,4 +1,4 @@
-// Guia por etapas: explicação à esquerda e função completa à direita.
+// Funções completas por etapa, com o código ampliado ao abrir a página.
 const abas = Array.from(document.querySelectorAll('[role="tab"]'));
 const paineis = Array.from(document.querySelectorAll('[role="tabpanel"]'));
 const anterior = document.getElementById("anterior-aula");
@@ -70,8 +70,8 @@ function focarCodigo(ativo) {
     document.querySelectorAll(".focar-codigo").forEach((botao) => {
         botao.setAttribute("aria-pressed", String(ativo));
         botao.textContent = ativo
-            ? "Voltar à explicação ↙"
-            : "Ampliar código ↗";
+            ? "Reduzir código"
+            : "Ampliar código";
     });
 }
 

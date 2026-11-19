@@ -18,7 +18,7 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Conjuntos na prática · Busca de voos</title>
+    <title>Teoria dos Conjuntos · Busca de voos</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
     <link rel="stylesheet" href="{{ url_for('static', filename='inicio.css') }}" />
     <script defer src="{{ url_for('static', filename='inicio.js') }}"></script>
@@ -26,10 +26,11 @@
 <body class="pagina-inicial">
 <main>
     <header>
-        <a href="{{ url_for('index') }}" class="marca">VOA<span> / </span>LAB</a>
+        <a href="{{ url_for('index') }}" class="marca">Teoria dos Conjuntos</a>
         <span class="selo">Matemática para Computação</span>
         <nav class="navegacao-paginas" aria-label="Páginas do projeto">
             <a href="{{ url_for('index') }}" aria-current="page">Busca de voos</a>
+            <a href="{{ url_for('teoria') }}">Apresentação visual</a>
             <a href="{{ url_for('apresentacao') }}">Códigos do projeto</a>
         </nav>
     </header>
@@ -50,7 +51,14 @@
             <div><p class="sobretitulo">O PONTO DE PARTIDA</p><h2 id="titulo-dados">Os dados dos CSVs</h2></div>
             {% if base %}<span class="estado-dados">Dados carregados</span>{% endif %}
         </div>
-        {% if base %}
+        {% if erro_dados %}
+        <div class="erro" role="alert">
+            <strong>Confira os CSVs salvos.</strong>
+            <p>{{ erro_dados }}</p>
+            <p>Se você removeu uma cidade de <code>cidades.csv</code>, retire também as linhas dessa cidade de <code>companhias.csv</code>, ou inclua novamente seus turnos.</p>
+            <p>Salve os arquivos da pasta <code>data</code> e atualize a página, ou envie os dois CSVs corrigidos no formulário abaixo.</p>
+        </div>
+        {% elif base %}
         <div class="resumo-dados">
             <div><strong>{{ companhias_csv|length }}</strong><span>linhas de companhias</span></div>
             <div><strong>{{ cidades_csv|length }}</strong><span>linhas de cidades e turnos</span></div>
@@ -87,7 +95,7 @@
         {% endif %}
         {% if request.args.get('aviso') == 'importado' %}<p class="sucesso" role="status">CSV importados! Suas buscas já usam os novos dados.</p>{% endif %}
         <details id="importar-csv" class="importacao" {% if not base or erro_importacao %}open{% endif %}>
-            <summary>{{ 'Trocar os arquivos CSV' if base else 'Importar seus CSVs' }}</summary>
+            <summary>{{ 'Corrigir os arquivos CSV' if erro_dados else 'Trocar os arquivos CSV' if base else 'Importar seus CSVs' }}</summary>
             {% if erro_importacao %}<p class="erro" role="alert">{{ erro_importacao }}{% if base %} A base anterior foi mantida.{% endif %}</p>{% endif %}
             <form action="{{ url_for('index') }}" method="post" enctype="multipart/form-data">
                 <div class="arquivos-csv">
@@ -187,7 +195,7 @@
             {% endif %}
         </section>
     </div>
-    {% elif 'q' in request.args %}
+    {% elif 'q' in request.args and erro %}
     <p class="erro" role="alert">{{ erro }}</p>
     {% endif %}
     <footer>Python + Flask + Pandas <span>Companhia, cidade e turno: um elemento de cada vez.</span></footer>

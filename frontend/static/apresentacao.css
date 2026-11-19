@@ -1,29 +1,18 @@
-:root {
-    color-scheme: dark;
-    --ink: #e5eee9;
-    --muted: #a9bcb1;
-    --line: #35493e;
-    --paper: #101a15;
-    --accent: #acd188;
-    --surface: #19291f;
-    --surface-raised: #243a2c;
-}
 .sobretitulo,
 code {
     color: var(--accent);
 }
 .navegacao-paginas a[aria-current="page"] {
-    color: #142218;
+    color: var(--paper);
 }
 a:focus-visible,
 button:focus-visible {
     outline-color: var(--accent);
 }
-.introducao-aula {
-    padding-bottom: 25px;
-}
-.introducao-aula h1 {
-    font-size: clamp(32px, 4.5vw, 48px);
+.titulo-codigos {
+    font-size: clamp(24px, 3vw, 32px);
+    letter-spacing: -0.8px;
+    margin: 28px 0 22px;
 }
 .abas {
     display: flex;
@@ -48,98 +37,17 @@ button:focus-visible {
 }
 .abas button[aria-selected="true"] {
     background: var(--accent);
-    color: #142218;
+    color: var(--paper);
 }
 .conteudo-aula {
     display: grid;
-    grid-template-columns: minmax(0, 0.75fr) minmax(0, 1.25fr);
+    grid-template-columns: minmax(0, 1fr);
     gap: 28px;
     padding: 26px 0;
     align-items: start;
 }
 .conteudo-aula[hidden] {
     display: none;
-}
-.explicacao-aula {
-    min-width: 0;
-}
-.explicacao-aula > .sobretitulo {
-    margin: 0 0 14px;
-}
-.explicacao-aula .conceito-aula {
-    font-size: 12px;
-    color: var(--accent);
-    font-weight: 650;
-}
-.explicacao-aula h2 {
-    font-size: 25px;
-    line-height: 1.2;
-    letter-spacing: -0.6px;
-    margin: 10px 0 16px;
-}
-.explicacao-aula > p {
-    font-size: 14px;
-    color: var(--muted);
-}
-.explicacao-aula .detalhe-aula {
-    padding: 15px;
-    border-left: 3px solid var(--accent);
-    border-radius: 0 8px 8px 0;
-    background: var(--surface-raised);
-    color: var(--ink);
-    font-size: 13px;
-}
-.detalhe-aula code {
-    overflow-wrap: anywhere;
-}
-.termos-aula {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 10px;
-    margin: 18px 0;
-}
-.termos-aula > div {
-    padding: 13px;
-    border: 1px solid var(--line);
-    border-radius: 9px;
-    background: var(--surface);
-}
-.termos-aula dt {
-    font-size: 12px;
-    font-weight: 750;
-}
-.termos-aula dd {
-    margin: 6px 0 0;
-    color: var(--muted);
-    font-size: 12px;
-}
-.demo-aula {
-    padding: 16px;
-    border: 1px solid var(--line);
-    border-radius: 10px;
-    background: var(--surface);
-}
-.demo-aula strong {
-    font-size: 13px;
-}
-.demo-aula p {
-    font-size: 12px;
-    color: var(--muted);
-    margin: 6px 0 12px;
-}
-.demo-aula a {
-    display: inline-block;
-    border: 1px solid var(--line);
-    border-radius: 7px;
-    padding: 8px 11px;
-    color: var(--ink);
-    text-decoration: none;
-    font-size: 12px;
-    font-weight: 650;
-}
-.demo-aula a:hover {
-    background: var(--accent);
-    color: #142218;
 }
 .bloco-codigo {
     min-width: 0;
@@ -183,11 +91,9 @@ button:focus-visible {
 }
 .captura-codigo {
     padding: 30px;
-    border: 1px solid #42604b;
+    border: 1px solid var(--line);
     border-radius: 16px;
-    background:
-        radial-gradient(ellipse at top left, #476a46, transparent 65%),
-        linear-gradient(135deg, #2e4f37, #183b30);
+    background: #14181e;
 }
 .janela-codigo {
     min-width: 0;
@@ -320,10 +226,6 @@ button:focus-visible {
 .codigo-em-foco .conteudo-aula {
     grid-template-columns: minmax(0, 1fr);
 }
-.codigo-em-foco .explicacao-aula,
-.codigo-em-foco .introducao-aula {
-    display: none;
-}
 .codigo-em-foco .captura-codigo {
     padding: clamp(20px, 5vw, 55px);
 }
@@ -359,7 +261,7 @@ button:focus-visible {
 .navegacao-aula button:last-child {
     background: var(--accent);
     border-color: var(--accent);
-    color: #142218;
+    color: var(--paper);
 }
 #numero-aula {
     color: var(--muted);
@@ -376,9 +278,6 @@ button:focus-visible {
     }
 }
 @media (max-width: 450px) {
-    .termos-aula {
-        grid-template-columns: 1fr;
-    }
     .navegacao-aula {
         gap: 7px;
         flex-wrap: wrap;

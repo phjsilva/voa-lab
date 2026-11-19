@@ -1,14 +1,5 @@
 /* Estilos exclusivos da página principal. */
-.pagina-inicial {
-    color-scheme: dark;
-    --ink: #e5eee9;
-    --muted: #a9bcb1;
-    --line: #35493e;
-    --paper: #101a15;
-    --accent: #acd188;
-    --surface: #19291f;
-    --surface-raised: #243a2c;
-}
+
 .pagina-inicial .painel {
     background: var(--surface);
     border-color: var(--line);
@@ -20,7 +11,7 @@
 .pagina-inicial .navegacao-paginas a[aria-current="page"],
 .pagina-inicial .botao-importar {
     background: var(--accent);
-    color: #142218;
+    color: var(--paper);
 }
 .pagina-inicial .arquivo-csv input::file-selector-button {
     background: var(--surface-raised);
@@ -33,7 +24,7 @@
 }
 .pagina-inicial .turno {
     background: var(--surface-raised);
-    color: #d5e8ca;
+    color: var(--ink);
 }
 .pagina-inicial .sucesso {
     background: #233d29;
@@ -110,7 +101,7 @@
     margin-left: auto;
     padding: 4px 9px;
     border-radius: 20px;
-    color: #cee6bb;
+    color: var(--ink);
     background: var(--surface-raised);
     font-size: 10px;
 }
@@ -182,7 +173,7 @@
 .filtro-conjunto select {
     width: 100%;
     padding: 12px;
-    border: 1px solid #4a6251;
+    border: 1px solid var(--line);
     border-radius: 8px;
     background: var(--paper);
     color: var(--ink);
@@ -230,8 +221,8 @@
 }
 .escolha-operacao:has(input:checked) {
     border-color: var(--accent);
-    background: #304b35;
-    color: #e6f2db;
+    background: #29374f;
+    color: #e6eefb;
 }
 .escolha-operacao:focus-within {
     outline: 3px solid var(--accent);
@@ -249,7 +240,7 @@
 }
 .consulta-montada {
     padding: 12px;
-    border: 1px dashed #49624e;
+    border: 1px dashed var(--line);
     border-radius: 8px;
     background: var(--paper);
 }
@@ -275,14 +266,14 @@
     border: 0;
     border-radius: 8px;
     background: var(--accent);
-    color: #142218;
+    color: var(--paper);
     font:
         650 13px system-ui,
         sans-serif;
     cursor: pointer;
 }
 .botao-demonstrar:hover {
-    background: #c2e2a3;
+    background: #d2ddff;
 }
 .busca-texto label {
     margin: 16px 0 8px;
@@ -291,7 +282,7 @@
 .busca-texto input[type="search"] {
     width: 100%;
     padding: 12px;
-    border: 1px solid #4a6251;
+    border: 1px solid var(--line);
     border-radius: 8px;
     background: var(--paper);
     color: var(--ink);
@@ -325,7 +316,7 @@
     background: var(--surface-raised);
 }
 .painel-resultado {
-    border-top: 3px solid #9dbd6c;
+    border-top: 3px solid var(--accent);
     min-height: 410px;
 }
 .consulta-realizada {
@@ -364,7 +355,7 @@
     text-align: center;
 }
 .aguardando-resultado > span {
-    color: #8aa87e;
+    color: var(--muted);
     font-size: 40px;
     letter-spacing: 5px;
 }

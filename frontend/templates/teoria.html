@@ -1,0 +1,231 @@
+{% set voos = [
+    ('V1', 'Latam', 'Manhã'), ('V2', 'Latam', 'Tarde'), ('V3', 'Latam', 'Noite'),
+    ('V4', 'Azul', 'Manhã'), ('V5', 'Azul', 'Tarde'), ('V6', 'Azul', 'Noite')
+] %}
+{% set etapas = [('conceito', 'O conceito'), ('leitura-csv', 'Ler o CSV'), ('juncao-csv', 'Juntar as tabelas'), ('elementos', 'Os elementos'), ('universo', 'O universo'), ('conjunto-a', 'O conjunto A'), ('conjunto-b', 'O conjunto B'), ('intersecao', 'E · interseção'), ('uniao', 'OU · união'), ('diferenca', 'EXCETO · diferença'), ('cardinalidade', 'A quantidade')] %}
+{% set arquivos_csv = [
+    ('companhias', ['companhia', 'cidade'], [('latam', 'sjc'), ('azul', 'sjc')]),
+    ('cidades', ['cidade', 'turno'], [('sjc', 'manhã'), ('sjc', 'tarde'), ('sjc', 'noite')])
+] %}
+{% macro bilhete(id, companhia, turno) %}
+<div class="bilhete"><strong>{{ id }}</strong><div><b>{{ companhia }}</b><span>SJC · {{ turno }}</span></div><span class="mini-aviao" aria-hidden="true">✈</span></div>
+{% endmacro %}
+{% macro diagrama(modo, selecionados=[]) %}
+<div class="diagrama" role="img" aria-label="A contém V1, V2 e V3. B contém V1 e V4. V1 está na interseção. V5 e V6 estão fora de ambos.{% if selecionados %} Selecionados: {{ selecionados|join(', ') }}.{% endif %}">
+    <svg viewBox="0 0 720 400" aria-hidden="true" class="venn">
+        <defs>
+            <clipPath id="inter-{{ modo }}"><circle cx="450" cy="195" r="150" /></clipPath>
+            <mask id="somente-a-{{ modo }}"><rect width="720" height="400" fill="white" /><circle cx="450" cy="195" r="150" fill="black" /></mask>
+        </defs>
+        <circle class="base-a" cx="270" cy="195" r="150" />
+        <circle class="base-b" cx="450" cy="195" r="150" />
+        {% if modo == 'intersecao' %}<circle class="regiao-selecionada" cx="270" cy="195" r="150" clip-path="url(#inter-{{ modo }})" />{% endif %}
+        {% if modo in ['uniao', 'cardinalidade'] %}<path class="regiao-selecionada" d="M360 75 A150 150 0 1 0 360 315 A150 150 0 1 0 360 75Z" />{% endif %}
+        {% if modo == 'diferenca' %}<circle class="regiao-selecionada" cx="270" cy="195" r="150" mask="url(#somente-a-{{ modo }})" />{% endif %}
+        <circle class="borda-a" cx="270" cy="195" r="150" />
+        <circle class="borda-b" cx="450" cy="195" r="150" />
+    </svg>
+    <span class="rotulo-a">A <span>Latam</span></span><span class="rotulo-b">B <span>Manhã</span></span>
+    {% for id, companhia, turno in voos %}<span class="ponto {{ id|lower }}{% if id in selecionados %} selecionado{% endif %}">{{ id }}{% if id in selecionados %}<span class="check" aria-hidden="true">✓</span>{% endif %}</span>{% endfor %}
+    <span class="fora-conjuntos">Fora de A e B</span>
+</div>
+{% endmacro %}
+{% macro passo(id, numero, tema) %}
+<section id="painel-{{ id }}" class="slide" role="tabpanel" aria-labelledby="aba-{{ id }}" {% if numero != 1 %}hidden{% endif %}>
+    <div class="texto-slide"><p class="tema-slide">{{ tema }}</p>{{ caller('texto') }}</div>
+    <div class="visual-slide">{{ caller('visual') }}</div>
+</section>
+{% endmacro %}
+<!doctype html>
+<html lang="pt-BR">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Teoria dos Conjuntos · Apresentação visual</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='teoria.css') }}" />
+    <script defer src="{{ url_for('static', filename='teoria.js') }}"></script>
+</head>
+<body class="pagina-teoria">
+<main>
+    <header>
+        <a href="{{ url_for('index') }}" class="marca">Teoria dos Conjuntos</a>
+        <nav class="navegacao-paginas" aria-label="Páginas do projeto">
+            <a href="{{ url_for('index') }}">Busca de voos</a>
+            <a href="{{ url_for('teoria') }}" aria-current="page">Apresentação visual</a>
+            <a href="{{ url_for('apresentacao') }}">Códigos do projeto</a>
+        </nav>
+    </header>
+    <div class="abertura-teoria"><div><p class="sobretitulo">MATEMÁTICA PARA COMPUTAÇÃO</p><h1>Do conceito à busca de voos.</h1></div><span class="identificacao-aula">Teoria dos conjuntos</span></div>
+    <div class="trilha" role="tablist" aria-label="Etapas da apresentação">
+        {% for id, nome in etapas %}<button id="aba-{{ id }}" type="button" role="tab" data-etapa="{{ id }}" aria-controls="painel-{{ id }}" aria-selected="{{ 'true' if loop.first else 'false' }}" tabindex="{{ 0 if loop.first else -1 }}"><span class="indice-trilha">{{ loop.index }}</span>{{ nome }}</button>{% endfor %}
+    </div>
+    <div class="palco">
+    {% call(parte) passo('conceito', 1, 'PRIMEIRO, A IDEIA') %}
+        {% if parte == 'texto' %}
+        <h2>Um conjunto é uma coleção de elementos.</h2>
+        <p>A teoria dos conjuntos estuda essas coleções, quais elementos pertencem a elas e como podemos combiná-las.</p>
+        <p>Os elementos podem ser <strong>números, letras, objetos ou pessoas</strong>. Uma regra clara permite decidir o que pertence ao conjunto, como no conjunto das vogais ou dos números pares.</p>
+        <div class="ideia-chave"><span>Duas propriedades para lembrar</span><strong>A ordem dos elementos não altera o conjunto. Repetir um elemento também não cria um conjunto diferente.</strong></div>
+        {% else %}
+        <div class="colecao-intro"><span class="etiqueta-visual">F · UM CONJUNTO DE FRUTAS</span><div class="colecao-chaves"><span class="chave" aria-hidden="true">{</span><div><div class="bilhete"><div><b>Maçã</b></div></div><div class="bilhete"><div><b>Banana</b></div></div><div class="bilhete"><div><b>Laranja</b></div></div></div><span class="chave" aria-hidden="true">}</span></div><p class="legenda-visual">As chaves representam o conjunto F.<br />Cada fruta é um elemento desse conjunto.</p></div>
+        {% endif %}
+    {% endcall %}
+    {% call(parte) passo('leitura-csv', 2, 'DO ARQUIVO DE TEXTO À TABELA') %}
+        {% if parte == 'texto' %}
+        <h2>O CSV é texto organizado em linhas.</h2>
+        <p>A primeira linha é o <strong>cabeçalho</strong>: ela dá nome às colunas. Nas linhas seguintes, a vírgula separa os valores de cada coluna.</p>
+        <p>Avance a leitura para ver cada parte do texto ocupar seu lugar na tabela. Compare os dois arquivos do exemplo.</p>
+        <div class="ideia-chave"><span>No projeto</span><strong><code>pd.read_csv(arquivo, ...)</code> transforma o arquivo em uma tabela do Pandas, chamada DataFrame.</strong></div>
+        <p class="nota-demonstracao">Aqui dividimos a leitura em passos para explicar. O código lê o arquivo completo e confere cabeçalho e valores.</p>
+        <details class="ponte-codigo"><summary>Ver a leitura no código</summary><p><code>ler_csv</code> aceita vírgula ou ponto e vírgula, exige as duas colunas esperadas e recusa valores vazios.</p><a href="{{ url_for('apresentacao', _anchor='csv') }}">Ver a função completa</a></details>
+        {% else %}
+        <div class="escolha-csv" role="group" aria-label="Arquivo da demonstração">
+            {% for arquivo, colunas, linhas in arquivos_csv %}<button type="button" data-arquivo-csv="{{ arquivo }}" aria-controls="leitura-{{ arquivo }}" aria-pressed="{{ 'true' if loop.first else 'false' }}">{{ arquivo }}.csv</button>{% endfor %}
+        </div>
+        {% for arquivo, colunas, linhas in arquivos_csv %}
+        <div id="leitura-{{ arquivo }}" data-csv-painel="{{ arquivo }}" {% if not loop.first %}hidden{% endif %}>
+            <div class="titulo-csv"><span>No arquivo</span><strong>Texto separado por vírgulas</strong></div>
+            <div class="fonte-csv" aria-label="Conteúdo de {{ arquivo }}.csv">
+                <div data-linha-csv="0"><span aria-hidden="true">1</span><code>{{ colunas|join(',') }}</code></div>
+                {% for linha in linhas %}<div data-linha-csv="{{ loop.index }}"><span aria-hidden="true">{{ loop.index + 1 }}</span><code>{{ linha|join(',') }}</code></div>{% endfor %}
+            </div>
+            <div class="ligacao-csv"><span aria-hidden="true">↓</span><code>pd.read_csv</code></div>
+            <div class="titulo-csv"><span>No Pandas</span><strong>Uma tabela com linhas e colunas</strong></div>
+            <div class="destino-csv">
+                <p data-espera-csv>O arquivo está pronto. Comece pelo cabeçalho.</p>
+                <table class="tabela-didatica" data-tabela-csv hidden>
+                    <caption class="somente-leitor">Tabela lida de {{ arquivo }}.csv</caption>
+                    <thead data-destino-csv="0"><tr>{% for coluna in colunas %}<th scope="col">{{ coluna }}</th>{% endfor %}</tr></thead>
+                    <tbody>
+                        <tr data-vazio-csv><td colspan="2">Colunas criadas. Faltam as linhas de dados.</td></tr>
+                        {% for linha in linhas %}<tr data-destino-csv="{{ loop.index }}" hidden>{% for valor in linha %}<td>{{ valor }}</td>{% endfor %}</tr>{% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        {% endfor %}
+        <div class="controles-leitura"><button id="ler-linha-csv" type="button" class="acao-csv">Ler cabeçalho</button><button id="reiniciar-csv" type="button" class="reiniciar-csv" disabled>Recomeçar leitura</button></div>
+        <p id="estado-leitura-csv" class="estado-leitura" aria-live="polite">Nenhuma linha lida.</p>
+        {% endif %}
+    {% endcall %}
+    {% call(parte) passo('juncao-csv', 3, 'A CIDADE LIGA OS DOIS ARQUIVOS') %}
+        {% if parte == 'texto' %}
+        <h2>Uma companhia encontra os turnos da sua cidade.</h2>
+        <p>A primeira tabela tem <strong>companhia e cidade</strong>. A segunda tem <strong>cidade e turno</strong>.</p>
+        <p>A junção compara a coluna <strong>cidade</strong>. Para cada companhia em SJC, encontra três linhas de SJC e forma três combinações.</p>
+        <div class="ideia-chave"><span>Escolha Latam, Azul ou as duas</span><strong>Duas companhias em SJC × três turnos em SJC = os seis elementos do nosso exemplo.</strong></div>
+        <details class="ponte-codigo"><summary>Ver a junção no código</summary><p><code>companhias.merge(cidades, on="cidade")</code> associa linhas com a mesma cidade. Depois, <code>ler_base</code> mantém as três colunas e remove combinações repetidas.</p><a href="{{ url_for('apresentacao', _anchor='juncao') }}">Ver a função completa</a></details>
+        {% else %}
+        <div class="escolha-csv" role="group" aria-label="Companhia para acompanhar na junção"><button type="button" data-juntar="latam" aria-pressed="true">Latam</button><button type="button" data-juntar="azul" aria-pressed="false">Azul</button><button type="button" data-juntar="todas" aria-pressed="false">As duas</button></div>
+        <div class="tabelas-origem">
+            <div><h3>companhias.csv</h3><table class="tabela-didatica"><thead><tr><th scope="col">companhia</th><th scope="col" class="coluna-chave">cidade</th></tr></thead><tbody><tr data-origem-companhia="latam" class="linha-ativa"><td>latam</td><td class="coluna-chave">sjc</td></tr><tr data-origem-companhia="azul"><td>azul</td><td class="coluna-chave">sjc</td></tr></tbody></table></div>
+            <div><h3>cidades.csv</h3><table class="tabela-didatica"><thead><tr><th scope="col" class="coluna-chave">cidade</th><th scope="col">turno</th></tr></thead><tbody>{% for turno in ['manhã', 'tarde', 'noite'] %}<tr><td class="coluna-chave">sjc</td><td>{{ turno }}</td></tr>{% endfor %}</tbody></table></div>
+        </div>
+        <div class="chave-juncao"><span>Mesma cidade nas duas tabelas</span><code>cidade = sjc</code></div>
+        <div class="titulo-csv"><span>Resultado da junção</span><strong>Companhia + cidade + turno</strong></div>
+        <table class="tabela-didatica tabela-juncao"><caption class="somente-leitor">Combinações geradas pela junção</caption><thead><tr><th scope="col">ID*</th><th scope="col">companhia</th><th scope="col">cidade</th><th scope="col">turno</th></tr></thead><tbody>{% for id, companhia, turno in voos %}<tr data-resultado-companhia="{{ companhia|lower }}" {% if companhia != 'Latam' %}hidden{% endif %}><th scope="row">{{ id }}</th><td>{{ companhia|lower }}</td><td>sjc</td><td>{{ turno|lower }}</td></tr>{% endfor %}</tbody></table>
+        <p id="estado-juncao" class="estado-leitura" aria-live="polite">Latam em SJC encontra 3 turnos: V1, V2 e V3.</p>
+        <p class="nota-demonstracao">* V1 a V6 são rótulos para acompanhar a explicação. O código forma as três colunas, sem criar esses IDs.</p>
+        {% endif %}
+    {% endcall %}
+    {% call(parte) passo('elementos', 4, 'CADA LINHA É UM ELEMENTO') %}
+        {% if parte == 'texto' %}
+        <h2>Um voo. Três informações.</h2>
+        <p>Identificamos cada elemento pela combinação completa: <strong>companhia, cidade e turno</strong>.</p>
+        <p>V1 e V2 são elementos diferentes. Mesmo com a mesma companhia e cidade, eles têm turnos diferentes.</p>
+        <div class="ideia-chave"><span>No código</span><code>COLUNAS = ["companhia", "cidade", "turno"]</code></div>
+        {% else %}
+        <div class="elemento-detalhado"><span class="etiqueta-visual">POR DENTRO DO ELEMENTO V1</span><div class="tripla"><div><span>Companhia</span><strong>Latam</strong></div><div><span>Cidade</span><strong>SJC</strong></div><div><span>Turno</span><strong>Manhã</strong></div></div><div class="comparacao-bilhetes">{{ bilhete('V1', 'Latam', 'Manhã') }}{{ bilhete('V2', 'Latam', 'Tarde') }}</div><p class="legenda-visual">Mudou o turno, mudou o elemento.</p></div>
+        {% endif %}
+    {% endcall %}
+    {% call(parte) passo('universo', 5, 'TODOS OS ELEMENTOS DO EXEMPLO') %}
+        {% if parte == 'texto' %}
+        <h2>O universo é o nosso ponto de partida.</h2>
+        <p>O conjunto universo, chamado de <strong>U</strong>, reúne todos os elementos considerados no problema.</p>
+        <p>Vamos acompanhar os mesmos <strong>seis voos</strong> até o final. Todos são de SJC; mudam a companhia e o turno.</p>
+        <div class="ideia-chave"><span>Exemplo didático fixo</span><strong>Estes seis elementos ilustram a lógica do projeto, independentemente dos CSVs importados.</strong></div>
+        {% else %}
+        <div class="universo"><div class="titulo-universo"><strong>U</strong><span>Todos os voos do exemplo</span><b>6 elementos</b></div><div class="grade-bilhetes">{% for id, companhia, turno in voos %}{{ bilhete(id, companhia, turno) }}{% endfor %}</div></div>
+        {% endif %}
+    {% endcall %}
+    {% call(parte) passo('conjunto-a', 6, 'UMA CONDIÇÃO FORMA UM SUBCONJUNTO') %}
+        {% if parte == 'texto' %}
+        <h2>O círculo reúne quem passa no filtro.</h2>
+        <p>Escolhemos a condição <strong>“ser da Latam”</strong>. Os elementos que atendem a ela formam o conjunto A.</p>
+        <p>O círculo é uma representação visual: estar dentro significa <strong>pertencer ao conjunto</strong>.</p>
+        <div class="notacao"><span>V1 ∈ A</span><p>V1 pertence a A.</p><span>V4 ∉ A</span><p>V4 não pertence a A: é da Azul.</p></div>
+        {% else %}
+        <div class="filtro-consulta"><span>Filtro A</span><code>companhia == "latam"</code></div>
+        <div class="conjunto-simples" role="img" aria-label="Círculo A: V1, V2 e V3 são da Latam. Fora: V4, V5 e V6 são da Azul."><div class="circulo-a"><strong>A · Latam</strong><div><span>V1</span><span>V2</span><span>V3</span></div></div><div class="elementos-fora"><span>V4</span><span>V5</span><span>V6</span><small>Azul · fora de A</small></div></div>
+        <div class="resultado-visual"><span>Subconjunto de U</span><strong>A = {V1, V2, V3}</strong></div>
+        {% endif %}
+    {% endcall %}
+    {% call(parte) passo('conjunto-b', 7, 'UM ELEMENTO PODE PERTENCER A DOIS CONJUNTOS') %}
+        {% if parte == 'texto' %}
+        <h2>Agora, os voos da manhã.</h2>
+        <p>A condição <strong>“ser da manhã”</strong> forma o conjunto B, com V1 e V4.</p>
+        <p>V1 é da Latam <strong>e</strong> da manhã. Por isso, fica na região em que os círculos se encontram.</p>
+        <div class="ideia-chave"><span>Observe o V4</span><strong>Ele pertence a B porque é da manhã, mesmo sendo da Azul.</strong></div>
+        {% else %}
+        {{ diagrama('conjunto-b') }}
+        <div class="resultado-visual"><span>Dois filtros, dois conjuntos</span><strong>A = {V1, V2, V3} &nbsp; B = {V1, V4}</strong></div>
+        {% endif %}
+    {% endcall %}
+    {% call(parte) passo('intersecao', 8, 'E · INTERSEÇÃO') %}
+        {% if parte == 'texto' %}
+        <h2>Precisa cumprir as duas condições.</h2>
+        <p>Na interseção, selecionamos os elementos que pertencem a A <strong>e também</strong> a B.</p>
+        <div class="consulta-exemplo"><span>O que digitamos</span><code>voos latam e manhã</code></div>
+        <p>Somente V1 passa nos dois filtros: é da Latam e é da manhã.</p>
+        <details class="ponte-codigo"><summary>Como o código faz isso?</summary><p><code>intersecao(a, b)</code> usa <code>merge</code> para manter as linhas presentes nas duas tabelas.</p><a href="{{ url_for('apresentacao', _anchor='intersecao') }}">Ver a função completa</a></details>
+        {% else %}
+        {{ diagrama('intersecao', ['V1']) }}
+        <div class="resultado-visual"><span>A ∩ B · a região em comum</span><strong>{V1} <small>1 elemento</small></strong></div>
+        {% endif %}
+    {% endcall %}
+    {% call(parte) passo('uniao', 9, 'OU · UNIÃO') %}
+        {% if parte == 'texto' %}
+        <h2>Basta cumprir uma das condições.</h2>
+        <p>Na união, selecionamos todos os elementos de A <strong>ou</strong> de B, incluindo quem pertence aos dois.</p>
+        <div class="consulta-exemplo"><span>O que digitamos</span><code>voos latam ou manhã</code></div>
+        <div class="ideia-chave"><span>Por que a Azul entra?</span><strong>V4 é da manhã. Isso já basta para entrar, mesmo sem ser da Latam.</strong></div>
+        <details class="ponte-codigo"><summary>Como o código faz isso?</summary><p><code>uniao(a, b)</code> junta as tabelas com <code>concat</code> e remove as repetições com <code>drop_duplicates</code>. V1 aparece uma vez.</p><a href="{{ url_for('apresentacao', _anchor='uniao') }}">Ver a função completa</a></details>
+        {% else %}
+        {{ diagrama('uniao', ['V1', 'V2', 'V3', 'V4']) }}
+        <div class="resultado-visual"><span>A ∪ B · tudo dentro dos círculos</span><strong>{V1, V2, V3, V4} <small>4 elementos</small></strong></div>
+        {% endif %}
+    {% endcall %}
+    {% call(parte) passo('diferenca', 10, 'EXCETO · DIFERENÇA') %}
+        {% if parte == 'texto' %}
+        <h2>Comece em A. Retire quem está em B.</h2>
+        <p>Na diferença A − B, selecionamos os elementos de A que <strong>não pertencem</strong> a B.</p>
+        <div class="consulta-exemplo"><span>O que digitamos</span><code>voos latam exceto manhã</code></div>
+        <p>Começamos com V1, V2 e V3. Retiramos V1, que é da manhã. Sobram V2 e V3.</p>
+        <details class="ponte-codigo"><summary>Como o código faz isso?</summary><p><code>diferenca(a, b)</code> mantém as linhas marcadas como <code>left_only</code>: estão apenas no primeiro conjunto. A ordem importa: B − A seria {V4}.</p><a href="{{ url_for('apresentacao', _anchor='diferenca') }}">Ver a função completa</a></details>
+        {% else %}
+        {{ diagrama('diferenca', ['V2', 'V3']) }}
+        <div class="resultado-visual"><span>A − B · a parte exclusiva de A</span><strong>{V2, V3} <small>2 elementos</small></strong></div>
+        {% endif %}
+    {% endcall %}
+    {% call(parte) passo('cardinalidade', 11, 'CARDINALIDADE · QUANTOS ELEMENTOS?') %}
+        {% if parte == 'texto' %}
+        <h2>Contar também faz parte da teoria.</h2>
+        <p>A cardinalidade é a <strong>quantidade de elementos distintos</strong> de um conjunto. Escrevemos |A| para dizer “quantidade de elementos de A”.</p>
+        <div class="conta-uniao"><span>|A ∪ B| = |A| + |B| − |A ∩ B|</span><strong>4 = 3 + 2 − 1</strong></div>
+        <p>Subtraímos a interseção porque V1 foi contado em A e em B. Na união, ele vale apenas um elemento.</p>
+        <p>Se uma busca não selecionar nenhum elemento, o resultado é o <strong>conjunto vazio ∅</strong>, com cardinalidade zero.</p>
+        {% else %}
+        {{ diagrama('cardinalidade', ['V1', 'V2', 'V3', 'V4']) }}
+        <div class="resultado-visual"><span>União sem repetir V1</span><strong>|A ∪ B| = 4</strong></div>
+        <a class="link-pratica" href="{{ url_for('index') }}">Experimentar com os meus CSVs</a>
+        {% endif %}
+    {% endcall %}
+    </div>
+    <div class="controle-aula"><button id="teoria-anterior" type="button" disabled>Anterior</button><div><span id="teoria-posicao" aria-live="polite">1 de {{ etapas|length }}</span><span class="dica-teclado">Use também as setas do teclado</span></div><button id="teoria-proxima" class="botao-principal" type="button">Próxima etapa</button></div>
+    <details class="referencia-voos"><summary>Consultar os seis voos do exemplo</summary><div class="grade-bilhetes">{% for id, companhia, turno in voos %}{{ bilhete(id, companhia, turno) }}{% endfor %}</div><p>SJC = São José dos Campos. V1 a V6 são identificações didáticas para as combinações, não números reais de voos.</p></details>
+    <noscript><style>.slide[hidden] {display:grid}.trilha,.controle-aula {display:none}.slide {margin-bottom:24px}</style><p>Todos os passos estão visíveis. Ative o JavaScript para navegar por etapas.</p></noscript>
+    <footer>Teoria dos conjuntos <span>Um conceito de cada vez. Os mesmos voos do início ao fim.</span></footer>
+</main>
+</body>
+</html>

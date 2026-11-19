@@ -29,7 +29,14 @@ def create_app(pasta_dados=None):
             except (ValueError, OSError) as problema:
                 erro_importacao = str(problema)
 
-        companhias, cidades, base = carregar_base(pasta)
+        try:
+            companhias, cidades, base = carregar_base(pasta)
+        except (ValueError, OSError) as problema:
+            return render_template(
+                "index.html", consulta=request.args.get("q", ""), erro=None,
+                erro_importacao=erro_importacao, erro_dados=str(problema),
+                resultados=[], quantidade=0, base=[], companhias_csv=[], cidades_csv=[],
+            ), 400
         consulta = request.args.get("q", "")
         resultado = base.iloc[0:0]
         erro = None
@@ -50,6 +57,10 @@ def create_app(pasta_dados=None):
     @app.get("/apresentacao")
     def apresentacao():
         return render_template("apresentacao.html")
+
+    @app.get("/teoria")
+    def teoria():
+        return render_template("teoria.html")
 
     @app.errorhandler(413)
     def tamanho_excedido(erro):
